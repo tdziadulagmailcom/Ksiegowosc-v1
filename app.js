@@ -601,8 +601,16 @@ function updateTableCell(table, update) {
     const cell = row.querySelector(`td:nth-child(${update.column + 2})`); // +2 bo pierwsza kolumna to numer wiersza
     if (!cell) return;
     
+    // Wartość domyślna
+    let displayValue = update.value;
+    
+    // Jeśli to tabela bills i wartość jest ujemna, wyświetl wartość dodatnią
+    if (table.id === 'billsTable' && typeof update.value === 'string' && update.value.startsWith('-')) {
+        displayValue = update.value.substring(1); // Usuń znak minus
+    }
+    
     // Ustaw wartość bez oznaczenia waluty
-    cell.textContent = update.value;
+    cell.textContent = displayValue;
     
     if (update.className) {
         cell.className = update.className;
@@ -614,6 +622,7 @@ function updateTableCell(table, update) {
     cell.dataset.platform = update.platform || '';
     cell.dataset.value = update.value || '';
 }
+
     /**
      * Generuje i pobiera plik Excel z danymi
      */

@@ -209,79 +209,86 @@ async function processCsv(file, platform) {
                         });
                     }
                     
-                    // Funkcja przetwarzająca dane Amazon IT z użyciem indeksów kolumn
-                    function processAmazonItDataWithIndices(rows, nColumnIndex, oColumnIndex, pToYColumnIndices) {
-                        let venditeSum = 0;
-                        let imposteSum = 0;
-                        let expensesSum = 0;
-                        
-                        // Pomiń pierwszy wiersz (nagłówki)
-                        for (let i = 1; i < rows.length; i++) {
-                            const row = rows[i];
-                            if (!row || row.length === 0) continue;
-                            
-                            // Suma kolumny Vendite (N)
-                            if (nColumnIndex < row.length) {
-                                const valueStr = row[nColumnIndex];
-                                if (valueStr) {
-                                    // Konwersja wartości z włoskiego formatu (123,45 -> 123.45)
-                                    const value = parseFloat(valueStr.toString().replace(/\./g, '').replace(/,/g, '.'));
-                                    if (!isNaN(value)) {
-                                        venditeSum += value;
-                                    }
-                                }
-                            }
-                            
-                            // Suma kolumny imposta sulle vendite (O)
-                            if (oColumnIndex < row.length) {
-                                const valueStr = row[oColumnIndex];
-                                if (valueStr) {
-                                    const value = parseFloat(valueStr.toString().replace(/\./g, '').replace(/,/g, '.'));
-                                    if (!isNaN(value)) {
-                                        imposteSum += value;
-                                    }
-                                }
-                            }
-                            
-                            // Suma kolumn P-Y (Expenses)
-                            for (const colIndex of pToYColumnIndices) {
-                                if (colIndex < row.length) {
-                                    const valueStr = row[colIndex];
-                                    if (valueStr) {
-                                        const value = parseFloat(valueStr.toString().replace(/\./g, '').replace(/,/g, '.'));
-                                        if (!isNaN(value)) {
-                                            expensesSum += value;
-                                        }
-                                    }
-                                }
-                            }
-                        }
-                        
-                        // Dla Amazon IT, income to suma kolumn N i O
-                        financialData.Income = venditeSum + imposteSum;
-                        financialData.Expenses = expensesSum;
-                        // Nie używamy Tax dla Amazon IT
-                        financialData.Tax = 0;
-                        
-                        console.log('Obliczone wartości dla Amazon IT:');
-                        console.log('Vendite (N):', venditeSum);
-                        console.log('Imposte (O):', imposteSum);
-                        console.log('Income (N+O):', financialData.Income);
-                        console.log('Expenses (suma kolumn P-Y):', expensesSum);
-                        
-                        // Jeśli ekspensens są dodatnie, zamień na ujemne
-                        if (financialData.Expenses > 0) {
-                            financialData.Expenses = -Math.abs(financialData.Expenses);
-                        }
-                        
-                        // Zwróć wynik bez oznaczenia waluty
-                        resolve({
-                            platform: CONFIG[platform].name,
-                            currency: CONFIG[platform].currency,
-                            financialData: financialData,
-                            confidenceLevels: confidenceLevels
-                        });
+                   /**
+ * Funkcja przetwarzająca dane Amazon IT z użyciem indeksów kolumn
+ * Ta funkcja zastąpi istniejącą funkcję processAmazonItDataWithIndices w processCSV
+ */
+function processAmazonItDataWithIndices(rows, nColumnIndex, oColumnIndex, pToYColumnIndices) {
+    // Dla Amazon IT potrzebujemy indeksów kolumn N-Q dla income i R-Y dla expenses
+    // nColumnIndex typowo wskazuje na kolumnę N (Vendite)
+    // Znajdujemy resztę potrzebnych indeksów
+    
+    // Znajdź indeksy kolumn O, P, Q (oColumnIndex już mamy)
+    const pColumnIndex = pToYColumnIndices[0]; // Standardowo jest to pierwszy index z listy P-Y
+    const qColumnIndex = pColumnIndex + 1;     // Następny po P
+    
+    // Zdefiniuj indeksy kolumn dla income (N-Q) i expenses (R-Y)
+    const incomeColumnIndices = [nColumnIndex, oColumnIndex];
+    if (pColumnIndex !== undefined) incomeColumnIndices.push(pColumnIndex);
+    if (qColumnIndex !== undefined) incomeColumnIndices.push(qColumnIndex);
+    
+    // Expenses to będą R-Y (od trzeciego elementu w pToYColumnIndices)
+    const expensesColumnIndices = pToYColumnIndices.slice(2);
+    
+    let incomeSum = 0;
+    let expensesSum = 0;
+    
+    // Pomiń pierwszy wiersz (nagłówki)
+    for (let i = 1; i < rows.length; i++) {
+        const row = rows[i];
+        if (!row || row.length === 0) continue;
+        
+        // Suma kolumn N-Q (Income)
+        for (const colIndex of incomeColumnIndices) {
+            if (colIndex !== undefined && colIndex < row.length) {
+                const valueStr = row[colIndex];
+                if (valueStr) {
+                    // Konwersja wartości z włoskiego formatu (123,45 -> 123.45)
+                    const value = parseFloat(valueStr.toString().replace(/\./g, '').replace(/,/g, '.'));
+                    if (!isNaN(value)) {
+                        incomeSum += value;
                     }
+                }
+            }
+        }
+        
+        // Suma kolumn R-Y (Expenses)
+        for (const colIndex of expensesColumnIndices) {
+            if (colIndex !== undefined && colIndex < row.length) {
+                const valueStr = row[colIndex];
+                if (valueStr) {
+                    const value = parseFloat(valueStr.toString().replace(/\./g, '').replace(/,/g, '.'));
+                    if (!isNaN(value)) {
+                        expensesSum += value;
+                    }
+                }
+            }
+        }
+    }
+    
+    // Przypisz wartości do obiektu finansowego
+    financialData.Income = incomeSum;
+    financialData.Expenses = expensesSum;
+    // Nie używamy Tax dla Amazon IT
+    financialData.Tax = 0;
+    
+    console.log('Obliczone wartości dla Amazon IT:');
+    console.log('Income (suma kolumn N-Q):', incomeSum);
+    console.log('Expenses (suma kolumn R-Y):', expensesSum);
+    
+    // Jeśli expenses są dodatnie, zamień na ujemne (dla obliczeń wewnętrznych)
+    if (financialData.Expenses > 0) {
+        financialData.Expenses = -Math.abs(financialData.Expenses);
+    }
+    
+    // Zwróć wynik bez oznaczenia waluty
+    resolve({
+        platform: CONFIG[platform].name,
+        currency: CONFIG[platform].currency,
+        financialData: financialData,
+        confidenceLevels: confidenceLevels
+    });
+}
                     
                     // Funkcja przetwarzająca dane Amazon UK (domyślne indeksy)
                     function processAmazonUkData(rows) {
@@ -355,83 +362,74 @@ async function processCsv(file, platform) {
                         });
                     }
                     
-                    // Funkcja przetwarzająca dane Amazon IT (domyślne indeksy)
-                    function processAmazonItData(rows) {
-                        let venditeSum = 0;
-                        let imposteSum = 0;
-                        let expensesSum = 0;
-                        
-                        // Pomiń pierwsze wiersze (nagłówki itp.)
-                        for (let i = 1; i < rows.length; i++) {
-                            const row = rows[i];
-                            if (!row || row.length < 15) continue;
-                            
-                            // Domyślne indeksy dla Amazon IT: N=13, O=14, P-Y=15-24
-                            // Kolumna N (Vendite)
-                            if (row.length > 13) {
-                                const valueStr = row[13];
-                                if (valueStr) {
-                                    // Konwersja wartości z włoskiego formatu (123,45 -> 123.45)
-                                    const cleanValue = valueStr.toString().replace(/\./g, '').replace(/,/g, '.');
-                                    const value = parseFloat(cleanValue);
-                                    if (!isNaN(value)) {
-                                        venditeSum += value;
-                                    }
-                                }
-                            }
-                            
-                            // Kolumna O (imposta sulle vendite)
-                            if (row.length > 14) {
-                                const valueStr = row[14];
-                                if (valueStr) {
-                                    const cleanValue = valueStr.toString().replace(/\./g, '').replace(/,/g, '.');
-                                    const value = parseFloat(cleanValue);
-                                    if (!isNaN(value)) {
-                                        imposteSum += value;
-                                    }
-                                }
-                            }
-                            
-                            // Kolumny P-Y (expenses)
-                            for (let j = 15; j <= 24; j++) {
-                                if (row.length > j) {
-                                    const valueStr = row[j];
-                                    if (valueStr) {
-                                        const cleanValue = valueStr.toString().replace(/\./g, '').replace(/,/g, '.');
-                                        const value = parseFloat(cleanValue);
-                                        if (!isNaN(value)) {
-                                            expensesSum += value;
-                                        }
-                                    }
-                                }
-                            }
-                        }
-                        
-                        // Dla Amazon IT, income to suma kolumn N i O
-                        financialData.Income = venditeSum + imposteSum;
-                        financialData.Expenses = expensesSum;
-                        // Nie używamy Tax dla Amazon IT
-                        financialData.Tax = 0;
-                        
-                        console.log('Obliczone wartości dla Amazon IT (domyślne indeksy):');
-                        console.log('Vendite (N):', venditeSum);
-                        console.log('Imposte (O):', imposteSum);
-                        console.log('Income (N+O):', financialData.Income);
-                        console.log('Expenses (suma kolumn P-Y):', expensesSum);
-                        
-                        // Jeśli ekspensens są dodatnie, zamień na ujemne
-                        if (financialData.Expenses > 0) {
-                            financialData.Expenses = -Math.abs(financialData.Expenses);
-                        }
-                        
-                        // Zwróć wynik bez oznaczenia waluty
-                        resolve({
-                            platform: CONFIG[platform].name,
-                            currency: CONFIG[platform].currency,
-                            financialData: financialData,
-                            confidenceLevels: confidenceLevels
-                        });
+                 /**
+ * Funkcja przetwarzająca dane Amazon IT (domyślne indeksy)
+ * Ta funkcja zastąpi istniejącą funkcję processAmazonItData w processCSV
+ */
+function processAmazonItData(rows) {
+    let incomeSum = 0;
+    let expensesSum = 0;
+    
+    // Pomiń pierwsze wiersze (nagłówki itp.)
+    for (let i = 1; i < rows.length; i++) {
+        const row = rows[i];
+        if (!row || row.length < 15) continue;
+        
+        // NOWE: Income to suma kolumn N do Q (13-16)
+        for (let j = 13; j <= 16; j++) {
+            if (row.length > j) {
+                const valueStr = row[j];
+                if (valueStr) {
+                    // Konwersja wartości z włoskiego formatu (123,45 -> 123.45)
+                    const cleanValue = valueStr.toString().replace(/\./g, '').replace(/,/g, '.');
+                    const value = parseFloat(cleanValue);
+                    if (!isNaN(value)) {
+                        incomeSum += value;
                     }
+                }
+            }
+        }
+        
+        // NOWE: Expenses to suma kolumn R do Y (17-24)
+        for (let j = 17; j <= 24; j++) {
+            if (row.length > j) {
+                const valueStr = row[j];
+                if (valueStr) {
+                    const cleanValue = valueStr.toString().replace(/\./g, '').replace(/,/g, '.');
+                    const value = parseFloat(cleanValue);
+                    if (!isNaN(value)) {
+                        expensesSum += value;
+                    }
+                }
+            }
+        }
+    }
+    
+    // Przypisz wartości do obiektu finansowego
+    financialData.Income = incomeSum;
+    financialData.Expenses = expensesSum;
+    // Nie używamy Tax dla Amazon IT
+    financialData.Tax = 0;
+    
+    console.log('Obliczone wartości dla Amazon IT (domyślne indeksy):');
+    console.log('Income (suma kolumn N-Q):', incomeSum);
+    console.log('Expenses (suma kolumn R-Y):', expensesSum);
+    
+    // Jeśli expenses są dodatnie, zamień na ujemne (dla obliczeń wewnętrznych)
+    if (financialData.Expenses > 0) {
+        financialData.Expenses = -Math.abs(financialData.Expenses);
+    }
+    
+    // Zwróć wynik bez oznaczenia waluty
+    resolve({
+        platform: CONFIG[platform].name,
+        currency: CONFIG[platform].currency,
+        financialData: financialData,
+        confidenceLevels: confidenceLevels
+    });
+}
+                        
+                     
                     
                     // Funkcja przetwarzająca dane dla innych platform
                     function processDefaultData(worksheet) {
