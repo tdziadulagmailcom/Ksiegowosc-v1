@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Amazon Reports Processor</title>
+    <link rel="stylesheet" href="styles.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.4.120/pdf.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+</head>
+<body>
+    <div class="container">
+        <h1>Amazon Reports Processor</h1>
+        
+        <div class="form-group">
+            <label for="platform">Wybierz platformę:</label>
+            <select id="platform">
+                <option value="uk">Amazon UK</option>
+                <option value="de">Amazon DE</option>
+                <option value="es">Amazon ES</option>
+                <option value="fr">Amazon FR</option>
+                <option value="nl">Amazon NL</option>
+                <option value="it">Amazon IT</option>
+                <option value="usa">Amazon USA</option>
+                <option value="ebay">eBay</option>
+                <option value="etsy">Etsy</option>
+                <option value="bandq">B and Q</option>
+            </select>
+        </div>
+        
+        <div class="form-group">
+            <label for="fileInput">Wgraj plik raportu (PDF lub Excel):</label>
+            <input type="file" id="fileInput" accept=".pdf,.xls,.xlsx,.csv">
+        </div>
+        
+        <button id="processBtn">Przetwórz dane</button>
+        
+        <div id="loader" class="loader hidden"></div>
+        <div id="alertArea" class="hidden"></div>
+        
+        <div id="resultArea" class="result-area">
+            <h2>Wyniki:</h2>
+            
+            <!-- Tabela wyników wzorowana na załączonej tabeli -->
+            <div class="table-container">
+                <table id="resultsTable" class="results-table">
+                    <thead>
+                        <tr>
+                            <th>A</th>
+                            <th>B</th>
+                            <th>C</th>
+                            <th>D</th>
+                            <th>E</th>
+                            <th>F</th>
+                            <th>G</th>
+                            <th>H</th>
+                            <th>I</th>
+                            <th>J</th>
+                            <th>K</th>
+                            <th>L</th>
+                            <th>M</th>
+                            <th>N</th>
+                            <th>O</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <!-- Wiersze tabeli generowane przez skrypt -->
+                    </tbody>
+                </table>
+            </div>
+            
+            <div class="action-bar">
+                <button id="clearBtn" class="clear-btn">Wyczyść dane</button>
+                <button id="downloadBtn">Pobierz plik Excel</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="config.js"></script>
+    <script src="pdfProcessor.js"></script>
+    <script src="excelProcessor.js"></script>
+    <script src="csvProcessor.js"></script>
+    <script src="app.js"></script>
+</body>
+</html>
