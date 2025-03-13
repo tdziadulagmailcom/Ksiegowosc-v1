@@ -12,6 +12,27 @@ const CONFIG = {
             income: ['sales', 7, 10],  // Sales: L8 (indeksy od 0, więc wiersz 7, kolumna 10)
             expenses: ['bills', 6, 9], // Bills: K7 (indeksy od 0, więc wiersz 6, kolumna 9)
             tax: ['sales', 7, 13]      // Sales: N8 (indeksy od 0, więc wiersz 7, kolumna 13)
+        },
+        reportFormats: {
+            // Typowe nagłówki i formaty używane w raportach Amazon UK
+            headers: ["Account activity", "Summaries", "Income", "Expenses", "Tax", "Transfers"],
+            dateFormat: "MMM DD, YYYY", // Format daty używany w raportach
+            numberFormat: "#,##0.00", // Format liczb używany w raportach
+            // Specyficzne wzorce dla Amazon UK
+            patterns: {
+                income: [
+                    /Income\s+[\d,.-]+/i,
+                    /Sales, credits, and refunds\s+[\d,.-]+/i
+                ],
+                expenses: [
+                    /Expenses\s+[\d,.-]+/i,
+                    /Fees, including Amazon\s+[\d,.-]+/i
+                ],
+                tax: [
+                    /Tax\s+[\d,.-]+/i,
+                    /Net taxes collected\s+[\d,.-]+/i
+                ]
+            }
         }
     },
     
@@ -23,6 +44,11 @@ const CONFIG = {
             income: ['sales', 8, 10],  // Sales: K9
             expenses: ['bills', 2, 10], // Bills: K3
             tax: ['sales', 8, 12]      // Sales: M9
+        },
+        reportFormats: {
+            headers: ["Kontoaktivität", "Zusammenfassungen", "Einnahmen", "Ausgaben", "Steuern", "Überweisungen"],
+            dateFormat: "DD.MM.YYYY",
+            numberFormat: "#.##0,00"
         }
     },
     
@@ -33,6 +59,11 @@ const CONFIG = {
             income: ['sales', 12, 10],  // Sales: K13
             expenses: ['bills', 4, 10], // Bills: K5
             tax: ['sales', 12, 12]      // Sales: M13
+        },
+        reportFormats: {
+            headers: ["Actividad de la cuenta", "Resúmenes", "Ingresos", "Gastos", "Impuestos", "Transferencias"],
+            dateFormat: "DD/MM/YYYY",
+            numberFormat: "#.##0,00"
         }
     },
     
@@ -43,6 +74,11 @@ const CONFIG = {
             income: ['sales', 11, 10],  // Sales: K12
             expenses: ['bills', 3, 10], // Bills: K4
             tax: ['sales', 11, 12]      // Sales: M12
+        },
+        reportFormats: {
+            headers: ["Activité du compte", "Résumés", "Revenus", "Dépenses", "Taxes", "Transferts"],
+            dateFormat: "DD/MM/YYYY",
+            numberFormat: "#.##0,00"
         }
     },
     
@@ -53,6 +89,11 @@ const CONFIG = {
             income: ['sales', 8, 10],  // Sales: K9
             expenses: ['bills', 5, 10], // Bills: K6
             tax: ['sales', 8, 12]      // Sales: M9
+        },
+        reportFormats: {
+            headers: ["Accountactiviteit", "Samenvattingen", "Inkomsten", "Uitgaven", "Belastingen", "Overschrijvingen"],
+            dateFormat: "DD-MM-YYYY",
+            numberFormat: "#.##0,00"
         }
     },
     
@@ -63,6 +104,11 @@ const CONFIG = {
             income: ['sales', 10, 10],  // Sales: K11
             expenses: ['bills', 2, 10], // Bills: K3
             tax: ['sales', 10, 12]      // Sales: M11
+        },
+        reportFormats: {
+            headers: ["Attività dell'account", "Riepiloghi", "Entrate", "Spese", "Imposte", "Trasferimenti"],
+            dateFormat: "DD/MM/YYYY",
+            numberFormat: "#.##0,00"
         }
     },
     
@@ -73,6 +119,11 @@ const CONFIG = {
             income: ['sales', 5, 10],  // Sales: K6
             expenses: ['bills', 6, 10], // Bills: K7
             tax: ['sales', 5, 12]      // Sales: M6
+        },
+        reportFormats: {
+            headers: ["Account activity", "Summaries", "Income", "Expenses", "Tax", "Transfers"],
+            dateFormat: "MM/DD/YYYY",
+            numberFormat: "#,##0.00"
         }
     },
     
@@ -222,38 +273,38 @@ const DEMO_DATA = {
 // Słownik terminów dla różnych języków w raportach Amazon
 const LANGUAGE_MAPPINGS = {
     'uk': {  // Amazon UK (English)
-        'income': ['Income', 'income', 'Sales', 'Revenue', 'Total'],
-        'expenses': ['Expenses', 'expenses', 'Costs', 'Fees', 'Service Fee', 'Refund'],
-        'tax': ['Tax', 'tax', 'VAT']
+        'income': ['Income', 'income', 'Sales', 'Revenue', 'Total', 'sales, credits, and refunds'],
+        'expenses': ['Expenses', 'expenses', 'Costs', 'Fees', 'Service Fee', 'Refund', 'fees, including Amazon'],
+        'tax': ['Tax', 'tax', 'VAT', 'net taxes collected']
     },
     'de': {  // Amazon DE (German)
-        'income': ['Einnahmen', 'Umsätze', 'Einnahmen und Erstattungen'],
-        'expenses': ['Ausgaben', 'Gebühren', 'Kosten'],
-        'tax': ['Steuer', 'MwSt', 'Mehrwertsteuer']
+        'income': ['Einnahmen', 'Umsätze', 'Einnahmen und Erstattungen', 'Verkäufe, Gutschriften und Rückerstattungen'],
+        'expenses': ['Ausgaben', 'Gebühren', 'Kosten', 'Gebühren, einschließlich Amazon'],
+        'tax': ['Steuer', 'MwSt', 'Mehrwertsteuer', 'Steuern auf Produkte']
     },
     'es': {  // Amazon ES (Spanish)
-        'income': ['Ingresos', 'Ventas', 'Ingresos y reembolsos'],
-        'expenses': ['Gastos', 'Tarifas', 'Costes'],
-        'tax': ['Impuesto', 'IVA']
+        'income': ['Ingresos', 'Ventas', 'Ingresos y reembolsos', 'Ventas, créditos y reembolsos'],
+        'expenses': ['Gastos', 'Tarifas', 'Costes', 'Tarifas, incluidas las de Amazon'],
+        'tax': ['Impuesto', 'IVA', 'Impuestos sobre productos']
     },
     'fr': {  // Amazon FR (French)
-        'income': ['Revenus', 'Ventes', 'Chiffre d\'affaires'],
-        'expenses': ['Dépenses', 'Frais', 'Coûts'],
-        'tax': ['Taxe', 'TVA', 'Impôt']
+        'income': ['Revenus', 'Ventes', 'Chiffre d\'affaires', 'Ventes, crédits et remboursements'],
+        'expenses': ['Dépenses', 'Frais', 'Coûts', 'Frais, y compris Amazon'],
+        'tax': ['Taxe', 'TVA', 'Impôt', 'Taxes sur les produits']
     },
     'nl': {  // Amazon NL (Dutch)
-        'income': ['Inkomsten', 'Verkoop', 'Omzet'],
-        'expenses': ['Uitgaven', 'Kosten', 'Vergoedingen'],
-        'tax': ['Belasting', 'BTW']
+        'income': ['Inkomsten', 'Verkoop', 'Omzet', 'Verkopen, tegoeden en terugbetalingen'],
+        'expenses': ['Uitgaven', 'Kosten', 'Vergoedingen', 'Vergoedingen, inclusief Amazon'],
+        'tax': ['Belasting', 'BTW', 'Productbelastingen']
     },
     'it': {  // Amazon IT (Italian)
-        'income': ['Entrate', 'Vendite', 'Ricavi'],
-        'expenses': ['Spese', 'Costi', 'Commissioni'],
-        'tax': ['Tassa', 'IVA', 'Imposta']
+        'income': ['Entrate', 'Vendite', 'Ricavi', 'Vendite, crediti e rimborsi'],
+        'expenses': ['Spese', 'Costi', 'Commissioni', 'Commissioni, incluse quelle di Amazon'],
+        'tax': ['Tassa', 'IVA', 'Imposta', 'Imposte sui prodotti']
     },
     'usa': {  // Amazon USA (English)
-        'income': ['Income', 'Sales', 'Revenue'],
-        'expenses': ['Expenses', 'Costs', 'Fees'],
-        'tax': ['Tax', 'Sales tax']
+        'income': ['Income', 'Sales', 'Revenue', 'Sales, credits, and refunds'],
+        'expenses': ['Expenses', 'Costs', 'Fees', 'Fees, including Amazon'],
+        'tax': ['Tax', 'Sales tax', 'Product taxes']
     }
 };

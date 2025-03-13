@@ -23,6 +23,9 @@ document.addEventListener('DOMContentLoaded', function() {
     // Tablica na wszystkie przetworzone dane
     let allProcessedData = [];
     
+    // Zmienne dla trybu debugowania
+    let debugMode = false;
+    
     // Inicjalizacja tabel wyników
     initializeResultsTables();
     
@@ -52,6 +55,23 @@ document.addEventListener('DOMContentLoaded', function() {
             });
         });
     });
+    
+    // Dodaj debugowanie jeśli włączony jest tryb debug
+    if (debugMode) {
+        const debugContainer = document.createElement('div');
+        debugContainer.className = 'debug-container';
+        debugContainer.innerHTML = `
+            <h3>Tryb debugowania</h3>
+            <button id="debugUkBtn" class="action-button warning">Test Amazon UK</button>
+            <button id="debugShowTextBtn" class="action-button">Pokaż tekst PDF</button>
+            <div id="debugOutput" class="debug-output"></div>
+        `;
+        document.querySelector('.container').appendChild(debugContainer);
+        
+        // Event listenery dla przycisków debugowania
+        document.getElementById('debugUkBtn').addEventListener('click', testAmazonUkExtraction);
+        document.getElementById('debugShowTextBtn').addEventListener('click', showPdfText);
+    }
     
     /**
      * Inicjalizuje tabele wyników z predefiniowanymi danymi
@@ -384,6 +404,14 @@ document.addEventListener('DOMContentLoaded', function() {
                 throw new Error('Nieobsługiwany format pliku');
             }
             
+            // Sprawdzamy, czy podczas przetwarzania wystąpił błąd
+            if (extractedData.error) {
+                showAlert(extractedData.errorMessage || labels.processingError, 'error');
+                // Mimo błędu, próbujemy użyć danych demonstracyjnych
+                extractedData.error = false;
+                delete extractedData.errorMessage;
+            }
+            
             // Dodajemy dane do istniejących danych
             allProcessedData.push(extractedData);
             
@@ -392,6 +420,9 @@ document.addEventListener('DOMContentLoaded', function() {
             
             // Aktualizujemy tabele wyników
             updateResultsTables(extractedData);
+            
+            // Dodajemy szczegóły o przetworzonym pliku
+            addProcessedFileInfo(file.name, platform, extractedData);
             
             // Pokazujemy obszar wyników
             resultArea.classList.remove('hidden');
@@ -406,6 +437,68 @@ document.addEventListener('DOMContentLoaded', function() {
     }
     
     /**
+     * Dodaje informacje o przetworzonym pliku do interfejsu
+     * @param {string} fileName - Nazwa pliku
+     * @param {string} platform - Nazwa platformy
+     * @param {Object} data - Przetworzone dane
+     */
+    function addProcessedFileInfo(fileName, platform, data) {
+        // Sprawdź czy kontener na informacje o plikach istnieje
+        let filesInfoContainer = document.getElementById('processedFilesInfo');
+        if (!filesInfoContainer) {
+            // Utwórz kontener jeśli nie istnieje
+            filesInfoContainer = document.createElement('div');
+            filesInfoContainer.id = 'processedFilesInfo';
+            filesInfoContainer.className = 'processed-files-info';
+            
+            // Dodaj tytuł
+            const title = document.createElement('h3');
+            title.textContent = 'Przetworzone pliki:';
+            filesInfoContainer.appendChild(title);
+            
+            // Dodaj listę plików
+            const filesList = document.createElement('ul');
+            filesList.id = 'processedFilesList';
+            filesInfoContainer.appendChild(filesList);
+            
+            // Wstaw kontener przed obszarem akcji
+            const actionBar = document.querySelector('.action-bar');
+            resultArea.insertBefore(filesInfoContainer, actionBar);
+        }
+        
+        // Dodaj informacje o pliku do listy
+        const filesList = document.getElementById('processedFilesList');
+        const fileItem = document.createElement('li');
+        fileItem.className = 'file-info-item';
+        
+        // Sformatuj dane finansowe
+        const formatCurrency = (value) => {
+            return value.toFixed(2).replace(/\d(?=(\d{3})+\.)/g, '$&,') + ' ' + data.currency;
+        };
+        
+        // Utwórz treść elementu listy
+        fileItem.innerHTML = `
+            <div class="file-info-header">
+                <span class="file-name">${fileName}</span>
+                <span class="file-platform">${data.platform}</span>
+            </div>
+            <div class="file-data">
+                <span class="file-data-item income">
+                    Income: <strong>${formatCurrency(data.financialData.Income)}</strong>
+                </span>
+                <span class="file-data-item expense">
+                    Expenses: <strong>${formatCurrency(data.financialData.Expenses)}</strong>
+                </span>
+                <span class="file-data-item tax">
+                    Tax: <strong>${formatCurrency(data.financialData.Tax)}</strong>
+                </span>
+            </div>
+        `;
+        
+        filesList.appendChild(fileItem);
+    }
+    
+    /**
      * Aktualizuje tabele wyników na podstawie przetworzonych danych
      * @param {Object} data - Przetworzone dane z pliku
      */
@@ -415,6 +508,13 @@ document.addEventListener('DOMContentLoaded', function() {
         const financialData = data.financialData;
         const platformConfig = Object.values(CONFIG).find(config => config.name === platform) || CONFIG.uk;
         
+        // Dodajemy poziomy pewności dla wykrytych wartości (jeśli są dostępne)
+        const confidenceLevels = data.confidenceLevels || {
+            income: 'high',
+            expenses: 'high',
+            tax: 'high'
+        };
+        
         // Utwórz mapę komórek do aktualizacji
         [
             // Przychody
@@ -423,7 +523,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 row: platformConfig.mappings.income[1],
                 column: platformConfig.mappings.income[2],
                 value: financialData.Income.toFixed(2),
-                className: 'value-cell income',
+                className: `value-cell income confidence-${confidenceLevels.income}`,
                 suffix: ` ${currency}`
             },
             // Wydatki
@@ -432,7 +532,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 row: platformConfig.mappings.expenses[1],
                 column: platformConfig.mappings.expenses[2],
                 value: financialData.Expenses.toFixed(2),
-                className: 'value-cell expense',
+                className: `value-cell expense confidence-${confidenceLevels.expenses}`,
                 suffix: ` ${currency}`
             },
             // Podatek
@@ -441,7 +541,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 row: platformConfig.mappings.tax[1],
                 column: platformConfig.mappings.tax[2],
                 value: financialData.Tax.toFixed(2),
-                className: 'value-cell tax',
+                className: `value-cell tax confidence-${confidenceLevels.tax}`,
                 suffix: ` ${currency}`
             }
         ].forEach(update => {
@@ -587,6 +687,12 @@ document.addEventListener('DOMContentLoaded', function() {
         // Resetowanie tabel
         initializeResultsTables();
         
+        // Usunięcie informacji o przetworzonych plikach
+        const filesInfoContainer = document.getElementById('processedFilesInfo');
+        if (filesInfoContainer) {
+            filesInfoContainer.remove();
+        }
+        
         showAlert(labels.dataCleared, 'success');
     }
     
@@ -604,5 +710,150 @@ document.addEventListener('DOMContentLoaded', function() {
         setTimeout(() => {
             alertArea.classList.add('hidden');
         }, 5000);
+    }
+    
+    /**
+     * Testuje ekstrakcję danych z pliku PDF Amazon UK
+     * Funkcja używana w trybie debugowania
+     */
+    async function testAmazonUkExtraction() {
+        const debugOutput = document.getElementById('debugOutput');
+        debugOutput.innerHTML = '<div class="loader"></div><p>Testowanie ekstrakcji danych z przykładowego pliku Amazon UK...</p>';
+        
+        try {
+            // Symulujemy plik PDF, używając debugowego pliku
+            const fileInput = document.getElementById('fileInput');
+            if (fileInput.files.length > 0) {
+                const file = fileInput.files[0];
+                
+                // Odczytaj plik jako tekst
+                const reader = new FileReader();
+                reader.onload = async function(e) {
+                    try {
+                        // Utwórz nowy element pre na tekst
+                        const textContainer = document.createElement('pre');
+                        textContainer.className = 'debug-text';
+                        textContainer.textContent = '';
+                        
+                        // Dodaj nagłówek do tekstu
+                        debugOutput.innerHTML = '<h4>Debugowanie ekstrakcji danych:</h4>';
+                        
+                        // Utwórz kontener na logi
+                        const logsContainer = document.createElement('div');
+                        logsContainer.className = 'debug-logs';
+                        
+                        // Podmieniamy console.log, aby zapisywał do naszego kontenera
+                        const originalConsoleLog = console.log;
+                        console.log = function() {
+                            const args = Array.from(arguments);
+                            const logLine = document.createElement('div');
+                            logLine.className = 'log-line';
+                            logLine.textContent = args.join(' ');
+                            logsContainer.appendChild(logLine);
+                            
+                            // Wywołaj oryginalny console.log
+                            originalConsoleLog.apply(console, arguments);
+                        };
+                        
+                        // Wywołaj funkcję procesującą plik
+                        const result = await processPdf(file, 'uk');
+                        
+                        // Przywróć oryginalny console.log
+                        console.log = originalConsoleLog;
+                        
+                        // Dodaj wyniki do debugOutput
+                        const resultContainer = document.createElement('div');
+                        resultContainer.className = 'debug-result';
+                        resultContainer.innerHTML = `
+                            <h4>Wyniki ekstrakcji:</h4>
+                            <div class="result-item">Income: <strong>${result.financialData.Income.toFixed(2)} ${result.currency}</strong></div>
+                            <div class="result-item">Expenses: <strong>${result.financialData.Expenses.toFixed(2)} ${result.currency}</strong></div>
+                            <div class="result-item">Tax: <strong>${result.financialData.Tax.toFixed(2)} ${result.currency}</strong></div>
+                        `;
+                        
+                        // Dodaj wszystkie kontenery do debugOutput
+                        debugOutput.appendChild(resultContainer);
+                        debugOutput.appendChild(document.createElement('hr'));
+                        debugOutput.appendChild(document.createElement('h4')).textContent = 'Logi debugowania:';
+                        debugOutput.appendChild(logsContainer);
+                        
+                    } catch (error) {
+                        debugOutput.innerHTML += `<p class="error">Błąd podczas testowania: ${error.message}</p>`;
+                        console.error('Błąd testowania:', error);
+                    }
+                };
+                
+                reader.onerror = function() {
+                    debugOutput.innerHTML += `<p class="error">Błąd odczytu pliku</p>`;
+                };
+                
+                reader.readAsArrayBuffer(file);
+            } else {
+                debugOutput.innerHTML = '<p class="error">Najpierw wybierz plik PDF do debugowania</p>';
+            }
+        } catch (error) {
+            debugOutput.innerHTML += `<p class="error">Błąd: ${error.message}</p>`;
+            console.error('Błąd testowania:', error);
+        }
+    }
+    
+    /**
+     * Pokazuje tekst z pliku PDF
+     * Funkcja używana w trybie debugowania
+     */
+    async function showPdfText() {
+        const debugOutput = document.getElementById('debugOutput');
+        debugOutput.innerHTML = '<div class="loader"></div><p>Odczytywanie tekstu z pliku PDF...</p>';
+        
+        try {
+            // Symulujemy plik PDF, używając debugowego pliku
+            const fileInput = document.getElementById('fileInput');
+            if (fileInput.files.length > 0) {
+                const file = fileInput.files[0];
+                
+                // Odczytaj plik jako arraybuffer
+                const reader = new FileReader();
+                reader.onload = async function(e) {
+                    try {
+                        const arrayBuffer = e.target.result;
+                        const pdf = await pdfjsLib.getDocument({ data: arrayBuffer }).promise;
+                        
+                        let fullText = '';
+                        
+                        // Przetwarzamy każdą stronę PDF
+                        for (let i = 1; i <= pdf.numPages; i++) {
+                            const page = await pdf.getPage(i);
+                            const textContent = await page.getTextContent();
+                            const pageText = textContent.items.map(item => item.str).join(' ');
+                            fullText += pageText + '\n\n--- KONIEC STRONY ' + i + ' ---\n\n';
+                        }
+                        
+                        // Utwórz nowy element pre na tekst
+                        const textContainer = document.createElement('pre');
+                        textContainer.className = 'debug-text';
+                        textContainer.textContent = fullText;
+                        
+                        // Dodaj nagłówek i tekst do debugOutput
+                        debugOutput.innerHTML = '<h4>Tekst wyodrębniony z pliku PDF:</h4>';
+                        debugOutput.appendChild(textContainer);
+                        
+                    } catch (error) {
+                        debugOutput.innerHTML += `<p class="error">Błąd podczas odczytu tekstu: ${error.message}</p>`;
+                        console.error('Błąd odczytu tekstu:', error);
+                    }
+                };
+                
+                reader.onerror = function() {
+                    debugOutput.innerHTML += `<p class="error">Błąd odczytu pliku</p>`;
+                };
+                
+                reader.readAsArrayBuffer(file);
+            } else {
+                debugOutput.innerHTML = '<p class="error">Najpierw wybierz plik PDF do odczytu</p>';
+            }
+        } catch (error) {
+            debugOutput.innerHTML += `<p class="error">Błąd: ${error.message}</p>`;
+            console.error('Błąd odczytu tekstu:', error);
+        }
     }
 });
