@@ -37,20 +37,20 @@ const CONFIG = {
     },
     
     // Pozostałe platformy - zastępcze mapowania, które należy zaktualizować
-    'de': {
-        name: 'Amazon DE',
-        currency: 'EUR',
-        mappings: {
-            income: ['sales', 8, 10],  // Sales: K9
-            expenses: ['bills', 2, 10], // Bills: K3
-            tax: ['sales', 8, 12]      // Sales: M9
-        },
-        reportFormats: {
-            headers: ["Kontoaktivität", "Zusammenfassungen", "Einnahmen", "Ausgaben", "Steuern", "Überweisungen"],
-            dateFormat: "DD.MM.YYYY",
-            numberFormat: "#.##0,00"
-        }
+   'de': {
+    name: 'Amazon DE',
+    currency: 'EUR',
+    mappings: {
+        income: ['sales', 10, 10],  // Sales: L11 (indeksy od 0, więc wiersz 10, kolumna 10)
+        expenses: ['bills', 9, 9],  // Bills: K10 (indeksy od 0, więc wiersz 9, kolumna 9)
+        tax: ['sales', 8, 12]      // Ignorujemy zgodnie z instrukcją - pozostawione bez zmian
     },
+    reportFormats: {
+        headers: ["Kontoaktivität", "Zusammenfassungen", "Einnahmen", "Ausgaben", "Steuern", "Überweisungen"],
+        dateFormat: "DD.MM.YYYY",
+        numberFormat: "#.##0,00"
+    }
+}
     
     'es': {
         name: 'Amazon ES',
