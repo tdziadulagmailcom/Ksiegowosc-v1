@@ -440,63 +440,71 @@ document.addEventListener('DOMContentLoaded', function() {
      * @param {string} platform - Nazwa platformy
      * @param {Object} data - Przetworzone dane
      */
-    function addProcessedFileInfo(fileName, platform, data) {
-        // Sprawdź czy kontener na informacje o plikach istnieje
-        let filesInfoContainer = document.getElementById('processedFilesInfo');
-        if (!filesInfoContainer) {
-            // Utwórz kontener jeśli nie istnieje
-            filesInfoContainer = document.createElement('div');
-            filesInfoContainer.id = 'processedFilesInfo';
-            filesInfoContainer.className = 'processed-files-info';
-            
-            // Dodaj tytuł
-            const title = document.createElement('h3');
-            title.textContent = 'Przetworzone pliki:';
-            filesInfoContainer.appendChild(title);
-            
-            // Dodaj listę plików
-            const filesList = document.createElement('ul');
-            filesList.id = 'processedFilesList';
-            filesInfoContainer.appendChild(filesList);
-            
-            // Wstaw kontener przed obszarem akcji
-            const actionBar = document.querySelector('.action-bar');
-            resultArea.insertBefore(filesInfoContainer, actionBar);
-        }
+    /**
+ * Dodaje informacje o przetworzonym pliku do interfejsu
+ * @param {string} fileName - Nazwa pliku
+ * @param {string} platform - Nazwa platformy
+ * @param {Object} data - Przetworzone dane
+ */
+function addProcessedFileInfo(fileName, platform, data) {
+    // Sprawdź czy kontener na informacje o plikach istnieje
+    let filesInfoContainer = document.getElementById('processedFilesInfo');
+    if (!filesInfoContainer) {
+        // Utwórz kontener jeśli nie istnieje
+        filesInfoContainer = document.createElement('div');
+        filesInfoContainer.id = 'processedFilesInfo';
+        filesInfoContainer.className = 'processed-files-info';
         
-        // Dodaj informacje o pliku do listy
-        const filesList = document.getElementById('processedFilesList');
-        const fileItem = document.createElement('li');
-        fileItem.className = 'file-info-item';
+        // Dodaj tytuł
+        const title = document.createElement('h3');
+        title.textContent = 'Przetworzone pliki:';
+        filesInfoContainer.appendChild(title);
         
-        // Sformatuj dane finansowe
-        const formatCurrency = (value) => {
-            return value.toFixed(2).replace(/\d(?=(\d{3})+\.)/g, '$&,') + ' ' + data.currency;
-        };
+        // Dodaj listę plików
+        const filesList = document.createElement('ul');
+        filesList.id = 'processedFilesList';
+        filesInfoContainer.appendChild(filesList);
         
-        // Utwórz treść elementu listy
-        fileItem.innerHTML = `
-            <div class="file-info-header">
-                <span class="file-name">${fileName}</span>
-                <span class="file-platform">${data.platform}</span>
-            </div>
-            <div class="file-data">
-                <span class="file-data-item income">
-                    Income: <strong>${formatCurrency(data.financialData.Income)}</strong>
-                </span>
-                <span class="file-data-item expense">
-                    Expenses: <strong>${formatCurrency(data.financialData.Expenses)}</strong>
-                </span>
-                <span class="file-data-item tax">
-                    Tax: <strong>${formatCurrency(data.financialData.Tax)}</strong>
-                </span>
-            </div>
-        `;
-        
-        filesList.appendChild(fileItem);
+        // Wstaw kontener przed obszarem akcji
+        const actionBar = document.querySelector('.action-bar');
+        resultArea.insertBefore(filesInfoContainer, actionBar);
     }
     
- /**
+    // Dodaj informacje o pliku do listy
+    const filesList = document.getElementById('processedFilesList');
+    const fileItem = document.createElement('li');
+    fileItem.className = 'file-info-item';
+    
+    // Sformatuj dane finansowe - bez oznaczenia waluty
+    const formatCurrency = (value) => {
+        return value.toFixed(2).replace(/\d(?=(\d{3})+\.)/g, '$&,');
+    };
+    
+    // Utwórz treść elementu listy
+    fileItem.innerHTML = `
+        <div class="file-info-header">
+            <span class="file-name">${fileName}</span>
+            <span class="file-platform">${data.platform}</span>
+        </div>
+        <div class="file-data">
+            <span class="file-data-item income">
+                Income: <strong>${formatCurrency(data.financialData.Income)}</strong>
+            </span>
+            <span class="file-data-item expense">
+                Expenses: <strong>${formatCurrency(data.financialData.Expenses)}</strong>
+            </span>
+            ${data.platform !== 'Amazon IT' && data.platform !== 'Amazon DE' ? 
+                `<span class="file-data-item tax">
+                    Tax: <strong>${formatCurrency(data.financialData.Tax)}</strong>
+                </span>` : ''
+            }
+        </div>
+    `;
+    
+    filesList.appendChild(fileItem);
+}
+
+/**
  * Aktualizuje tabele wyników na podstawie przetworzonych danych
  * @param {Object} data - Przetworzone dane z pliku
  */
@@ -519,38 +527,36 @@ function updateResultsTables(data) {
     // Przygotuj wartości do aktualizacji
     const cellsToUpdate = [];
     
-    // Zawsze dodajemy przychody i wydatki
-    cellsToUpdate.push(
-        // Przychody
-        {
+    // Dodaj Income jeśli mapping istnieje
+    if (platformConfig.mappings.income[0] !== 'none') {
+        cellsToUpdate.push({
             table: platformConfig.mappings.income[0],
             row: platformConfig.mappings.income[1],
             column: platformConfig.mappings.income[2],
             value: financialData.Income.toFixed(2),
-            className: `value-cell income confidence-${confidenceLevels.income}`,
-            suffix: ` ${currency}`
-        },
-        // Wydatki
-        {
+            className: `value-cell income confidence-${confidenceLevels.income}`
+        });
+    }
+    
+    // Dodaj Expenses jeśli mapping istnieje
+    if (platformConfig.mappings.expenses[0] !== 'none') {
+        cellsToUpdate.push({
             table: platformConfig.mappings.expenses[0],
             row: platformConfig.mappings.expenses[1],
             column: platformConfig.mappings.expenses[2],
             value: financialData.Expenses.toFixed(2),
-            className: `value-cell expense confidence-${confidenceLevels.expenses}`,
-            suffix: ` ${currency}`
-        }
-    );
+            className: `value-cell expense confidence-${confidenceLevels.expenses}`
+        });
+    }
     
-    // Dodaj tax tylko jeśli to NIE jest Amazon DE
-    if (platform !== 'Amazon DE') {
+    // Dodaj Tax tylko jeśli to NIE jest Amazon DE/IT i istnieje mapping
+    if (platform !== 'Amazon DE' && platform !== 'Amazon IT' && platformConfig.mappings.tax[0] !== 'none') {
         cellsToUpdate.push({
-            // Podatek
             table: platformConfig.mappings.tax[0],
             row: platformConfig.mappings.tax[1],
             column: platformConfig.mappings.tax[2],
             value: financialData.Tax.toFixed(2),
-            className: `value-cell tax confidence-${confidenceLevels.tax}`,
-            suffix: ` ${currency}`
+            className: `value-cell tax confidence-${confidenceLevels.tax}`
         });
     }
     
@@ -563,45 +569,51 @@ function updateResultsTables(data) {
     // Dodatkowy krok: wypełnij kolumnę B (indeks 0) losowym numerem
     // Dla tabeli sales w wierszu przychodów
     const salesPlatformRow = platformConfig.mappings.income[1];
-    updateTableCell(salesTable, {
-        row: salesPlatformRow,
-        column: 0,
-        value: randomSixDigitNumber,
-        bold: true
-    });
+    if (platformConfig.mappings.income[0] === 'sales') {
+        updateTableCell(salesTable, {
+            row: salesPlatformRow,
+            column: 0,
+            value: randomSixDigitNumber,
+            bold: true
+        });
+    }
     
     // Dla tabeli bills w wierszu wydatków
     const billsPlatformRow = platformConfig.mappings.expenses[1];
-    updateTableCell(billsTable, {
-        row: billsPlatformRow,
-        column: 0,
-        value: randomSixDigitNumber,
-        bold: true
-    });
-}    
-    /**
-     * Aktualizuje komórkę w tabeli
-     * @param {HTMLElement} table - Element tabeli
-     * @param {Object} update - Obiekt z informacjami o aktualizacji
-     */
-    function updateTableCell(table, update) {
-        const row = table.querySelector(`tbody tr:nth-child(${update.row + 1})`);
-        if (!row) return;
-        
-        const cell = row.querySelector(`td:nth-child(${update.column + 2})`); // +2 bo pierwsza kolumna to numer wiersza
-        if (!cell) return;
-        
-        cell.textContent = update.value + (update.suffix || '');
-        if (update.className) {
-            cell.className = update.className;
-        }
-        if (update.bold) {
-            cell.style.fontWeight = 'bold';
-        }
-        
-        cell.dataset.platform = update.platform || '';
-        cell.dataset.value = update.value || '';
+    if (platformConfig.mappings.expenses[0] === 'bills') {
+        updateTableCell(billsTable, {
+            row: billsPlatformRow,
+            column: 0,
+            value: randomSixDigitNumber,
+            bold: true
+        });
     }
+}   
+/**
+ * Aktualizuje komórkę w tabeli
+ * @param {HTMLElement} table - Element tabeli
+ * @param {Object} update - Obiekt z informacjami o aktualizacji
+ */
+function updateTableCell(table, update) {
+    const row = table.querySelector(`tbody tr:nth-child(${update.row + 1})`);
+    if (!row) return;
+    
+    const cell = row.querySelector(`td:nth-child(${update.column + 2})`); // +2 bo pierwsza kolumna to numer wiersza
+    if (!cell) return;
+    
+    // Ustaw wartość bez oznaczenia waluty
+    cell.textContent = update.value;
+    
+    if (update.className) {
+        cell.className = update.className;
+    }
+    if (update.bold) {
+        cell.style.fontWeight = 'bold';
+    }
+    
+    cell.dataset.platform = update.platform || '';
+    cell.dataset.value = update.value || '';
+}
     /**
      * Generuje i pobiera plik Excel z danymi
      */

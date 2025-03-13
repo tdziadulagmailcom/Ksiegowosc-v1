@@ -101,9 +101,9 @@ const CONFIG = {
         name: 'Amazon IT',
         currency: 'EUR',
         mappings: {
-            income: ['sales', 10, 10],  // Sales: K11
-            expenses: ['bills', 2, 10], // Bills: K3
-            tax: ['sales', 10, 12]      // Sales: M11
+            income: ['sales', 8, 10],  // Sales: L9 (indeksy od 0, więc wiersz 8, kolumna 10)
+            expenses: ['bills', 7, 9], // Bills: K8 (indeksy od 0, więc wiersz 7, kolumna 9)
+            tax: ['none', 0, 0]         // Tax jest ignorowany
         },
         reportFormats: {
             headers: ["Attività dell'account", "Riepiloghi", "Entrate", "Spese", "Imposte", "Trasferimenti"],
@@ -229,7 +229,7 @@ const DEMO_DATA = {
         financialData: {
             Income: 11250.65,
             Expenses: -2540.18,
-            Tax: 1930.45
+            Tax: 0
         }
     },
     'usa': {
