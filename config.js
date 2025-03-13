@@ -37,7 +37,11 @@ const CONFIG = {
     },
     
     // Pozostałe platformy - zastępcze mapowania, które należy zaktualizować
+<<<<<<< HEAD
    'de': {
+=======
+  'de': {
+>>>>>>> 3201befb52970a374b53e11dec51855b04d37236
     name: 'Amazon DE',
     currency: 'EUR',
     mappings: {
