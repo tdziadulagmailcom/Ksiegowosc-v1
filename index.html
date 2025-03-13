@@ -39,34 +39,69 @@
         <div id="alertArea" class="hidden"></div>
         
         <div id="resultArea" class="result-area">
-            <h2>Wyniki:</h2>
+            <div class="tabs">
+                <button class="tab-button active" data-tab="sales">Sales</button>
+                <button class="tab-button" data-tab="bills">Bills</button>
+            </div>
             
-            <!-- Tabela wyników wzorowana na załączonej tabeli -->
-            <div class="table-container">
-                <table id="resultsTable" class="results-table">
-                    <thead>
-                        <tr>
-                            <th>A</th>
-                            <th>B</th>
-                            <th>C</th>
-                            <th>D</th>
-                            <th>E</th>
-                            <th>F</th>
-                            <th>G</th>
-                            <th>H</th>
-                            <th>I</th>
-                            <th>J</th>
-                            <th>K</th>
-                            <th>L</th>
-                            <th>M</th>
-                            <th>N</th>
-                            <th>O</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <!-- Wiersze tabeli generowane przez skrypt -->
-                    </tbody>
-                </table>
+            <div id="salesTab" class="tab-content active">
+                <h2>Sales (wiersze 1-13)</h2>
+                <div class="table-container">
+                    <table id="salesTable" class="results-table">
+                        <thead>
+                            <tr>
+                                <th>A</th>
+                                <th>B</th>
+                                <th>C</th>
+                                <th>D</th>
+                                <th>E</th>
+                                <th>F</th>
+                                <th>G</th>
+                                <th>H</th>
+                                <th>I</th>
+                                <th>J</th>
+                                <th>K</th>
+                                <th>L</th>
+                                <th>M</th>
+                                <th>N</th>
+                                <th>O</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <!-- Wiersze tabeli generowane przez skrypt -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            
+            <div id="billsTab" class="tab-content">
+                <h2>Bills (wiersze 1-12)</h2>
+                <div class="table-container">
+                    <table id="billsTable" class="results-table">
+                        <thead>
+                            <tr>
+                                <th>A</th>
+                                <th>B</th>
+                                <th>C</th>
+                                <th>D</th>
+                                <th>E</th>
+                                <th>F</th>
+                                <th>G</th>
+                                <th>H</th>
+                                <th>I</th>
+                                <th>J</th>
+                                <th>K</th>
+                                <th>L</th>
+                                <th>M</th>
+                                <th>N</th>
+                                <th>O</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <!-- Wiersze tabeli generowane przez skrypt -->
+                        </tbody>
+                    </table>
+                </div>
             </div>
             
             <div class="action-bar">

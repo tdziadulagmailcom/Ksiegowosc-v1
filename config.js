@@ -1,7 +1,7 @@
 /**
  * Konfiguracja mapowania danych dla poszczególnych platform
- * Określa, które wartości mają trafić do jakich komórek w tabeli
- * Format: [wiersz, kolumna] - gdzie kolumna to indeks od 0 do 14 (A-O)
+ * Określa, które wartości mają trafić do jakich komórek w tabelach
+ * Format: [tabela, wiersz, kolumna] - gdzie tabela to "sales" lub "bills", wiersz to indeks od 0, kolumna to indeks od 0 do 14 (A-O)
  */
 const CONFIG = {
     // Amazon UK - Zgodnie z wymaganiami
@@ -9,9 +9,9 @@ const CONFIG = {
         name: 'Amazon UK',
         currency: 'GBP',
         mappings: {
-            income: [7, 10],  // K8 (indeksy od 0, więc wiersz 7, kolumna 10)
-            expenses: [20, 9], // J21
-            tax: [7, 12]      // M8
+            income: ['sales', 7, 10],  // Sales: L8 (indeksy od 0, więc wiersz 7, kolumna 10)
+            expenses: ['bills', 6, 9], // Bills: K7 (indeksy od 0, więc wiersz 6, kolumna 9)
+            tax: ['sales', 7, 13]      // Sales: N8 (indeksy od 0, więc wiersz 7, kolumna 13)
         }
     },
     
@@ -20,9 +20,9 @@ const CONFIG = {
         name: 'Amazon DE',
         currency: 'EUR',
         mappings: {
-            income: [7, 10],  // K8
-            expenses: [20, 9], // J21
-            tax: [7, 12]      // M8
+            income: ['sales', 8, 10],  // Sales: K9
+            expenses: ['bills', 2, 10], // Bills: K3
+            tax: ['sales', 8, 12]      // Sales: M9
         }
     },
     
@@ -30,9 +30,9 @@ const CONFIG = {
         name: 'Amazon ES',
         currency: 'EUR',
         mappings: {
-            income: [7, 10],  // K8
-            expenses: [20, 9], // J21
-            tax: [7, 12]      // M8
+            income: ['sales', 12, 10],  // Sales: K13
+            expenses: ['bills', 4, 10], // Bills: K5
+            tax: ['sales', 12, 12]      // Sales: M13
         }
     },
     
@@ -40,9 +40,9 @@ const CONFIG = {
         name: 'Amazon FR',
         currency: 'EUR',
         mappings: {
-            income: [7, 10],  // K8
-            expenses: [20, 9], // J21
-            tax: [7, 12]      // M8
+            income: ['sales', 11, 10],  // Sales: K12
+            expenses: ['bills', 3, 10], // Bills: K4
+            tax: ['sales', 11, 12]      // Sales: M12
         }
     },
     
@@ -50,9 +50,9 @@ const CONFIG = {
         name: 'Amazon NL',
         currency: 'EUR',
         mappings: {
-            income: [7, 10],  // K8
-            expenses: [20, 9], // J21
-            tax: [7, 12]      // M8
+            income: ['sales', 8, 10],  // Sales: K9
+            expenses: ['bills', 5, 10], // Bills: K6
+            tax: ['sales', 8, 12]      // Sales: M9
         }
     },
     
@@ -60,9 +60,9 @@ const CONFIG = {
         name: 'Amazon IT',
         currency: 'EUR',
         mappings: {
-            income: [7, 10],  // K8
-            expenses: [20, 9], // J21
-            tax: [7, 12]      // M8
+            income: ['sales', 10, 10],  // Sales: K11
+            expenses: ['bills', 2, 10], // Bills: K3
+            tax: ['sales', 10, 12]      // Sales: M11
         }
     },
     
@@ -70,9 +70,9 @@ const CONFIG = {
         name: 'Amazon USA',
         currency: 'USD',
         mappings: {
-            income: [7, 10],  // K8
-            expenses: [20, 9], // J21
-            tax: [7, 12]      // M8
+            income: ['sales', 5, 10],  // Sales: K6
+            expenses: ['bills', 6, 10], // Bills: K7
+            tax: ['sales', 5, 12]      // Sales: M6
         }
     },
     
@@ -80,9 +80,9 @@ const CONFIG = {
         name: 'eBay',
         currency: 'GBP',
         mappings: {
-            income: [7, 10],  // K8
-            expenses: [20, 9], // J21
-            tax: [7, 12]      // M8
+            income: ['sales', 2, 10],  // Sales: K3
+            expenses: ['bills', 7, 10], // Bills: K8
+            tax: ['sales', 2, 12]      // Sales: M3
         }
     },
     
@@ -90,9 +90,9 @@ const CONFIG = {
         name: 'Etsy',
         currency: 'GBP',
         mappings: {
-            income: [7, 10],  // K8
-            expenses: [20, 9], // J21
-            tax: [7, 12]      // M8
+            income: ['sales', 4, 10],  // Sales: K5
+            expenses: ['bills', 8, 10], // Bills: K9
+            tax: ['sales', 4, 12]      // Sales: M5
         }
     },
     
@@ -100,9 +100,9 @@ const CONFIG = {
         name: 'B and Q',
         currency: 'GBP',
         mappings: {
-            income: [7, 10],  // K8
-            expenses: [20, 9], // J21
-            tax: [7, 12]      // M8
+            income: ['sales', 7, 10],  // Sales: K8
+            expenses: ['bills', 9, 10], // Bills: K10
+            tax: ['sales', 7, 12]      // Sales: M8
         }
     }
 };

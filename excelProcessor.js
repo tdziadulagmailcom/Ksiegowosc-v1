@@ -68,6 +68,23 @@ async function processExcel(file, platform) {
                                     financialData.Tax = value;
                                 }
                             }
+                            
+                            // Specjalne przetwarzanie dla plików QuickBooks
+                            if (key === 'ItemAmount' || key === '*ItemAmount') {
+                                const value = parseFloat(row[key]);
+                                if (!isNaN(value) && value > 0) {
+                                    financialData.Income = value;
+                                } else if (!isNaN(value) && value < 0) {
+                                    financialData.Expenses = value;
+                                }
+                            }
+                            
+                            if (key === 'ItemTaxAmount' || key === '*ItemTaxAmount') {
+                                const value = parseFloat(row[key]);
+                                if (!isNaN(value) && value > 0) {
+                                    financialData.Tax = value;
+                                }
+                            }
                         }
                     }
                     
