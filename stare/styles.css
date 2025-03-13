@@ -3,7 +3,7 @@ body {
     line-height: 1.6;
     margin: 0;
     padding: 20px;
-    background-color: #f0f8ff;
+    background-color: #f0f8ff; /* Jasnoniebieskie tło */
     color: #333;
 }
 
@@ -18,13 +18,13 @@ body {
 
 h1 {
     text-align: center;
-    color: #0052ae;
+    color: #0052ae; /* Ciemnoniebieski */
     margin-bottom: 30px;
     font-weight: 600;
 }
 
 h2 {
-    color: #0066cc;
+    color: #0066cc; /* Niebieski */
     border-bottom: 2px solid #e6f2ff;
     padding-bottom: 10px;
 }
@@ -37,16 +37,16 @@ label {
     display: block;
     margin-bottom: 8px;
     font-weight: 600;
-    color: #0066cc;
+    color: #0066cc; /* Niebieski */
 }
 
 select, input[type="file"] {
     width: 100%;
     padding: 12px;
-    border: 1px solid #b3d9ff;
+    border: 1px solid #b3d9ff; /* Jasnoniebieski */
     border-radius: 6px;
     font-size: 16px;
-    background-color: #f5faff;
+    background-color: #f5faff; /* Bardzo jasny niebieski */
     transition: border-color 0.3s, box-shadow 0.3s;
 }
 
@@ -57,7 +57,7 @@ select:focus, input[type="file"]:focus {
 }
 
 button {
-    background-color: #0066cc;
+    background-color: #0066cc; /* Niebieski */
     color: white;
     border: none;
     padding: 12px 28px;
@@ -71,7 +71,7 @@ button {
 }
 
 button:hover {
-    background-color: #0052ae;
+    background-color: #0052ae; /* Ciemniejszy niebieski */
 }
 
 button:active {
@@ -122,15 +122,15 @@ button:active {
 }
 
 .value-cell.income {
-    color: #155724;
+    color: #155724; /* Zielony */
 }
 
 .value-cell.expense {
-    color: #721c24;
+    color: #721c24; /* Czerwony */
 }
 
 .value-cell.tax {
-    color: #0c5460;
+    color: #0c5460; /* Ciemny niebieski */
 }
 
 .hidden {
@@ -226,6 +226,33 @@ button:active {
     display: block;
 }
 
+/* Dodatkowe style dla danych z pliku Excel */
+.excel-cell {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+.column-header {
+    font-weight: bold;
+    background-color: #f0f0f0;
+}
+
+/* Kolory dla różnych platform */
+.platform-uk {
+    color: #0066cc;
+}
+
+.platform-de, .platform-es, .platform-fr, .platform-it, .platform-nl {
+    color: #006600;
+}
+
+.platform-ebay {
+    color: #990000;
+}
+
+.platform-etsy {
+    color: #ff6600;
+}
+
 /* Style dla wskaźników pewności */
 .value-cell.confidence-high {
     border-left: 3px solid #28a745;
@@ -306,6 +333,151 @@ button:active {
 
 .file-data-item.tax {
     color: #0c5460;
+}
+
+/* Dodatkowe style dla informacji diagnostycznych */
+.diagnostic-info {
+    margin-top: 10px;
+    padding: 8px;
+    background-color: #f8f9fa;
+    border: 1px dashed #ced4da;
+    border-radius: 4px;
+    font-size: 12px;
+    color: #6c757d;
+}
+
+.diagnostic-info details {
+    margin-top: 5px;
+}
+
+.diagnostic-info summary {
+    cursor: pointer;
+    color: #0066cc;
+}
+
+/* Wzmocnienie kontrastu dla nagłówków tabeli */
+.results-table th {
+    background-color: #004d99;
+    color: white;
+    font-weight: bold;
+    padding: 8px 5px;
+}
+
+/* Poprawienie czytelności komórek tabeli */
+.results-table td {
+    padding: 6px 5px;
+    transition: background-color 0.2s;
+}
+
+.results-table tr:hover td {
+    background-color: #f0f7ff;
+}
+
+/* Style dla dodatkowych przycisków */
+.action-button {
+    background-color: #6c757d;
+    color: white;
+    border: none;
+    padding: 8px 15px;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 14px;
+    margin-right: 10px;
+    transition: background-color 0.2s;
+}
+
+.action-button:hover {
+    background-color: #5a6268;
+}
+
+.action-button.primary {
+    background-color: #0066cc;
+}
+
+.action-button.primary:hover {
+    background-color: #0052ae;
+}
+
+.action-button.warning {
+    background-color: #ffc107;
+    color: #212529;
+}
+
+.action-button.warning:hover {
+    background-color: #e0a800;
+}
+
+/* Style dla trybu debugowania */
+.debug-container {
+    margin-top: 30px;
+    padding: 15px;
+    background-color: #f8f9fa;
+    border: 1px dashed #ced4da;
+    border-radius: 6px;
+}
+
+.debug-container h3 {
+    margin-top: 0;
+    color: #dc3545;
+}
+
+.debug-output {
+    margin-top: 15px;
+    padding: 15px;
+    background-color: #f0f0f0;
+    border-radius: 4px;
+    max-height: 500px;
+    overflow-y: auto;
+}
+
+.debug-text {
+    background-color: #f8f9fa;
+    padding: 10px;
+    border: 1px solid #dee2e6;
+    border-radius: 4px;
+    font-family: monospace;
+    font-size: 12px;
+    white-space: pre-wrap;
+    max-height: 300px;
+    overflow-y: auto;
+}
+
+.debug-logs {
+    font-family: monospace;
+    font-size: 12px;
+    background-color: #212529;
+    color: #f8f9fa;
+    padding: 10px;
+    border-radius: 4px;
+    max-height: 300px;
+    overflow-y: auto;
+}
+
+.log-line {
+    margin-bottom: 2px;
+    white-space: pre-wrap;
+    word-break: break-all;
+}
+
+.debug-result {
+    background-color: #e6f2ff;
+    padding: 10px;
+    border-radius: 4px;
+    margin-bottom: 15px;
+}
+
+.debug-result h4 {
+    margin-top: 0;
+    color: #0066cc;
+}
+
+.result-item {
+    margin-bottom: 5px;
+}
+
+.error {
+    color: #dc3545;
+    font-weight: bold;
 }
 
 /* Responsywność dla urządzeń mobilnych */

@@ -3,13 +3,14 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Amazon Reports Processor Lite</title>
+    <title>Amazon Reports Processor</title>
     <link rel="stylesheet" href="styles.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.4.120/pdf.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
 </head>
 <body>
     <div class="container">
-        <h1>Amazon Reports Processor Lite</h1>
+        <h1>Amazon Reports Processor</h1>
         
         <div class="form-group">
             <label for="platform">Wybierz platformę:</label>
@@ -21,7 +22,6 @@
                 <option value="nl">Amazon NL</option>
                 <option value="it">Amazon IT</option>
                 <option value="usa">Amazon USA</option>
-                <option value="be">Amazon BE</option>
                 <option value="ebay">eBay</option>
                 <option value="etsy">Etsy</option>
                 <option value="bandq">B and Q</option>
@@ -29,8 +29,8 @@
         </div>
         
         <div class="form-group">
-            <label for="fileInput">Wgraj plik raportu (Excel lub CSV):</label>
-            <input type="file" id="fileInput" accept=".xls,.xlsx,.csv">
+            <label for="fileInput">Wgraj plik raportu (PDF lub Excel):</label>
+            <input type="file" id="fileInput" accept=".pdf,.xls,.xlsx,.csv">
         </div>
         
         <button id="processBtn">Przetwórz dane</button>
@@ -45,7 +45,7 @@
             </div>
             
             <div id="salesTab" class="tab-content active">
-                <h2>Sales (wiersze 1-15)</h2>
+                <h2>Sales (wiersze 1-13)</h2>
                 <div class="table-container">
                     <table id="salesTable" class="results-table">
                         <thead>
@@ -75,7 +75,7 @@
             </div>
             
             <div id="billsTab" class="tab-content">
-                <h2>Bills (wiersze 1-14)</h2>
+                <h2>Bills (wiersze 1-12)</h2>
                 <div class="table-container">
                     <table id="billsTable" class="results-table">
                         <thead>
@@ -112,8 +112,9 @@
     </div>
 
     <script src="config.js"></script>
-    <script src="csvProcessor.js"></script>
+    <script src="pdfProcessor.js"></script>
     <script src="excelProcessor.js"></script>
+    <script src="csvProcessor.js"></script>
     <script src="app.js"></script>
 </body>
 </html>

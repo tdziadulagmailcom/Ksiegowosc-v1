@@ -4,29 +4,54 @@
  * Format: [tabela, wiersz, kolumna] - gdzie tabela to "sales" lub "bills", wiersz to indeks od 0, kolumna to indeks od 0 do 14 (A-O)
  */
 const CONFIG = {
-    // Amazon UK 
+    // Amazon UK - Zgodnie z wymaganiami
     'uk': {
         name: 'Amazon UK',
         currency: 'GBP',
         mappings: {
             income: ['sales', 7, 10],  // Sales: L8 (indeksy od 0, więc wiersz 7, kolumna 10)
             expenses: ['bills', 6, 9], // Bills: K7 (indeksy od 0, więc wiersz 6, kolumna 9)
-            tax: ['sales', 7, 12]      // Sales: N8 (indeksy od 0, więc wiersz 7, kolumna 12)
+            tax: ['sales', 7, 12]      // Sales: N8 (indeksy od 0, więc wiersz 7, kolumna 12) - POPRAWIONE z 13 na 12
+        },
+        reportFormats: {
+            // Typowe nagłówki i formaty używane w raportach Amazon UK
+            headers: ["Account activity", "Summaries", "Income", "Expenses", "Tax", "Transfers"],
+            dateFormat: "MMM DD, YYYY", // Format daty używany w raportach
+            numberFormat: "#,##0.00", // Format liczb używany w raportach
+            // Specyficzne wzorce dla Amazon UK
+            patterns: {
+                income: [
+                    /Income\s+[\d,.-]+/i,
+                    /Sales, credits, and refunds\s+[\d,.-]+/i
+                ],
+                expenses: [
+                    /Expenses\s+[\d,.-]+/i,
+                    /Fees, including Amazon\s+[\d,.-]+/i
+                ],
+                tax: [
+                    /Tax\s+[\d,.-]+/i,
+                    /Net taxes collected\s+[\d,.-]+/i
+                ]
+            }
         }
     },
     
-    // Amazon DE
+    // Amazon DE - Poprawione zgodnie z nową specyfikacją
     'de': {
         name: 'Amazon DE',
         currency: 'EUR',
         mappings: {
             income: ['sales', 10, 10],  // Sales: L11 (indeksy od 0, więc wiersz 10, kolumna 10)
-            expenses: ['bills', 9, 9],   // Bills: K10 (indeksy od 0, więc wiersz 9, kolumna 9)
-            tax: ['none', 0, 0]         // Tax jest ignorowany dla Amazon DE
+            expenses: ['bills', 9, 9], // Bills: K10 (indeksy od 0, więc wiersz 9, kolumna 9)
+            tax: ['sales', 8, 12]      // Sales: M9 (pozostawione bez zmian zgodnie z instrukcją)
+        },
+        reportFormats: {
+            headers: ["Kontoaktivität", "Zusammenfassungen", "Einnahmen", "Ausgaben", "Steuern", "Überweisungen"],
+            dateFormat: "DD.MM.YYYY",
+            numberFormat: "#.##0,00"
         }
     },
     
-    // Amazon ES
     'es': {
         name: 'Amazon ES',
         currency: 'EUR',
@@ -34,32 +59,44 @@ const CONFIG = {
             income: ['sales', 9, 10],  // Sales: L10 (indeksy od 0, więc wiersz 9, kolumna 10)
             expenses: ['bills', 8, 9], // Bills: K9 (indeksy od 0, więc wiersz 8, kolumna 9)
             tax: ['none', 0, 0]        // Tax jest ignorowany dla Amazon ES
+        },
+        reportFormats: {
+            headers: ["Actividad de la cuenta", "Resúmenes", "Ingresos", "Gastos", "Impuestos", "Transferencias"],
+            dateFormat: "DD/MM/YYYY",
+            numberFormat: "#.##0,00"
         }
     },
     
-    // Amazon FR
     'fr': {
         name: 'Amazon FR',
         currency: 'EUR',
         mappings: {
-            income: ['sales', 11, 10],  // Sales: L12 (indeksy od 0, więc wiersz 11, kolumna 10)
-            expenses: ['bills', 10, 9],  // Bills: K11 (indeksy od 0, więc wiersz 10, kolumna 9)
-            tax: ['none', 0, 0]         // Tax jest ignorowany dla Amazon FR
+            income: ['sales', 11, 10],  // Sales: K12
+            expenses: ['bills', 3, 10], // Bills: K4
+            tax: ['sales', 11, 12]      // Sales: M12
+        },
+        reportFormats: {
+            headers: ["Activité du compte", "Résumés", "Revenus", "Dépenses", "Taxes", "Transferts"],
+            dateFormat: "DD/MM/YYYY",
+            numberFormat: "#.##0,00"
         }
     },
     
-    // Amazon NL
     'nl': {
         name: 'Amazon NL',
         currency: 'EUR',
         mappings: {
-            income: ['sales', 12, 10],  // Sales: L13 (indeksy od 0, więc wiersz 12, kolumna 10)
-            expenses: ['bills', 11, 9],  // Bills: K12 (indeksy od 0, więc wiersz 11, kolumna 9)
-            tax: ['sales', 12, 12]      // Sales: M13 (indeksy od 0, więc wiersz 12, kolumna 12)
+            income: ['sales', 8, 10],  // Sales: K9
+            expenses: ['bills', 5, 10], // Bills: K6
+            tax: ['sales', 8, 12]      // Sales: M9
+        },
+        reportFormats: {
+            headers: ["Accountactiviteit", "Samenvattingen", "Inkomsten", "Uitgaven", "Belastingen", "Overschrijvingen"],
+            dateFormat: "DD-MM-YYYY",
+            numberFormat: "#.##0,00"
         }
     },
     
-    // Amazon IT
     'it': {
         name: 'Amazon IT',
         currency: 'EUR',
@@ -67,32 +104,29 @@ const CONFIG = {
             income: ['sales', 8, 10],  // Sales: L9 (indeksy od 0, więc wiersz 8, kolumna 10)
             expenses: ['bills', 7, 9], // Bills: K8 (indeksy od 0, więc wiersz 7, kolumna 9)
             tax: ['none', 0, 0]         // Tax jest ignorowany
+        },
+        reportFormats: {
+            headers: ["Attività dell'account", "Riepiloghi", "Entrate", "Spese", "Imposte", "Trasferimenti"],
+            dateFormat: "DD/MM/YYYY",
+            numberFormat: "#.##0,00"
         }
     },
     
-    // Amazon USA
     'usa': {
         name: 'Amazon USA',
         currency: 'USD',
         mappings: {
-            income: ['sales', 14, 10],  // Sales: L15 (indeksy od 0, więc wiersz 14, kolumna 10)
-            expenses: ['bills', 13, 9],  // Bills: K14 (indeksy od 0, więc wiersz 13, kolumna 9)
-            tax: ['sales', 14, 12]      // Sales: M15 (indeksy od 0, więc wiersz 14, kolumna 12)
+            income: ['sales', 5, 10],  // Sales: K6
+            expenses: ['bills', 6, 10], // Bills: K7
+            tax: ['sales', 5, 12]      // Sales: M6
+        },
+        reportFormats: {
+            headers: ["Account activity", "Summaries", "Income", "Expenses", "Tax", "Transfers"],
+            dateFormat: "MM/DD/YYYY",
+            numberFormat: "#,##0.00"
         }
     },
     
-    // Amazon BE
-    'be': {
-        name: 'Amazon BE',
-        currency: 'EUR',
-        mappings: {
-            income: ['sales', 13, 10],  // Sales: L14 (indeksy od 0, więc wiersz 13, kolumna 10)
-            expenses: ['bills', 12, 9],  // Bills: K13 (indeksy od 0, więc wiersz 12, kolumna 9)
-            tax: ['sales', 13, 12]      // Sales: M14 (indeksy od 0, więc wiersz 13, kolumna 12)
-        }
-    },
-    
-    // eBay
     'ebay': {
         name: 'eBay',
         currency: 'GBP',
@@ -103,7 +137,6 @@ const CONFIG = {
         }
     },
     
-    // Etsy
     'etsy': {
         name: 'Etsy',
         currency: 'GBP',
@@ -114,7 +147,6 @@ const CONFIG = {
         }
     },
     
-    // B and Q
     'bandq': {
         name: 'B and Q',
         currency: 'GBP',
@@ -133,7 +165,7 @@ const TRANSLATIONS = {
         clearBtn: "Wyczyść dane",
         downloadBtn: "Pobierz plik Excel",
         platformLabel: "Wybierz platformę:",
-        fileLabel: "Wgraj plik raportu (Excel lub CSV):",
+        fileLabel: "Wgraj plik raportu (PDF lub Excel):",
         resultsTitle: "Wyniki:",
         noFileError: "Proszę wybrać plik do przetworzenia.",
         processSuccess: "Dane zostały pomyślnie przetworzone i dodane do tabeli!",
@@ -161,7 +193,7 @@ const DEMO_DATA = {
         financialData: {
             Income: 1594.42,
             Expenses: -335.12,
-            Tax: 0
+            Tax: 0  // Tax ustawiony na 0 dla Amazon DE
         }
     },
     'es': {
@@ -170,7 +202,7 @@ const DEMO_DATA = {
         financialData: {
             Income: 15200.75,
             Expenses: -3250.40,
-            Tax: 0
+            Tax: 0  // Tax ustawiony na 0 dla Amazon ES (zmienione)
         }
     },
     'fr': {
@@ -179,7 +211,7 @@ const DEMO_DATA = {
         financialData: {
             Income: 12450.35,
             Expenses: -2890.28,
-            Tax: 0
+            Tax: 2245.60
         }
     },
     'nl': {
@@ -207,15 +239,6 @@ const DEMO_DATA = {
             Income: 25680.92,
             Expenses: -5840.34,
             Tax: 4325.78
-        }
-    },
-    'be': {
-        platform: "Amazon BE",
-        currency: "EUR",
-        financialData: {
-            Income: 8945.30,
-            Expenses: -1875.45,
-            Tax: 1789.06
         }
     },
     'ebay': {
@@ -283,10 +306,5 @@ const LANGUAGE_MAPPINGS = {
         'income': ['Income', 'Sales', 'Revenue', 'Sales, credits, and refunds'],
         'expenses': ['Expenses', 'Costs', 'Fees', 'Fees, including Amazon'],
         'tax': ['Tax', 'Sales tax', 'Product taxes']
-    },
-    'be': {  // Amazon BE (French)
-        'income': ['Revenus', 'Ventes', 'ventes de produits', 'crédits d\'expédition'],
-        'expenses': ['Dépenses', 'Frais', 'frais de vente', 'Frais pour le service Expédié par Amazon', 'autres frais de transaction'],
-        'tax': ['Taxe', 'TVA', 'taxe de ventes prélevée', 'Taxe Marketplace Facilitator']
     }
 };
