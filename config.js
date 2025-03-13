@@ -56,9 +56,9 @@ const CONFIG = {
         name: 'Amazon ES',
         currency: 'EUR',
         mappings: {
-            income: ['sales', 12, 10],  // Sales: K13
-            expenses: ['bills', 4, 10], // Bills: K5
-            tax: ['sales', 12, 12]      // Sales: M13
+            income: ['sales', 9, 10],  // Sales: L10 (indeksy od 0, więc wiersz 9, kolumna 10)
+            expenses: ['bills', 8, 9], // Bills: K9 (indeksy od 0, więc wiersz 8, kolumna 9)
+            tax: ['none', 0, 0]        // Tax jest ignorowany dla Amazon ES
         },
         reportFormats: {
             headers: ["Actividad de la cuenta", "Resúmenes", "Ingresos", "Gastos", "Impuestos", "Transferencias"],
@@ -188,21 +188,21 @@ const DEMO_DATA = {
         }
     },
     'de': {
-    platform: "Amazon DE",
-    currency: "EUR",
-    financialData: {
-        Income: 1594.42,
-        Expenses: -335.12,
-        Tax: 0  // Tax ustawiony na 0 dla Amazon DE
-    }
-},
+        platform: "Amazon DE",
+        currency: "EUR",
+        financialData: {
+            Income: 1594.42,
+            Expenses: -335.12,
+            Tax: 0  // Tax ustawiony na 0 dla Amazon DE
+        }
+    },
     'es': {
         platform: "Amazon ES",
         currency: "EUR",
         financialData: {
             Income: 15200.75,
             Expenses: -3250.40,
-            Tax: 2860.15
+            Tax: 0  // Tax ustawiony na 0 dla Amazon ES (zmienione)
         }
     },
     'fr': {
@@ -283,9 +283,9 @@ const LANGUAGE_MAPPINGS = {
         'tax': ['Steuer', 'MwSt', 'Mehrwertsteuer', 'Steuern auf Produkte']
     },
     'es': {  // Amazon ES (Spanish)
-        'income': ['Ingresos', 'Ventas', 'Ingresos y reembolsos', 'Ventas, créditos y reembolsos'],
-        'expenses': ['Gastos', 'Tarifas', 'Costes', 'Tarifas, incluidas las de Amazon'],
-        'tax': ['Impuesto', 'IVA', 'Impuestos sobre productos']
+        'income': ['Ingresos', 'Ventas', 'ventas de productos', 'abonos de envío', 'abonos de envoltorio para regalo'],
+        'expenses': ['Gastos', 'Tarifas', 'tarifas de venta', 'tarifas de Logística de Amazon', 'tarifas de otras transacciones'],
+        'tax': ['Impuesto', 'IVA', 'impuesto de ventas de productos', 'impuestos por abonos de envío']
     },
     'fr': {  // Amazon FR (French)
         'income': ['Revenus', 'Ventes', 'Chiffre d\'affaires', 'Ventes, crédits et remboursements'],
