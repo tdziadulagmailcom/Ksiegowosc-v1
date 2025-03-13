@@ -11,7 +11,7 @@ const CONFIG = {
         mappings: {
             income: ['sales', 7, 10],  // Sales: L8 (indeksy od 0, więc wiersz 7, kolumna 10)
             expenses: ['bills', 6, 9], // Bills: K7 (indeksy od 0, więc wiersz 6, kolumna 9)
-            tax: ['sales', 7, 13]      // Sales: N8 (indeksy od 0, więc wiersz 7, kolumna 13)
+            tax: ['sales', 7, 12]      // Sales: N8 (indeksy od 0, więc wiersz 7, kolumna 13)
         },
         reportFormats: {
             // Typowe nagłówki i formaty używane w raportach Amazon UK
