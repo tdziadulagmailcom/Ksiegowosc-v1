@@ -72,7 +72,6 @@ document.addEventListener('DOMContentLoaded', function() {
         document.getElementById('debugUkBtn').addEventListener('click', testAmazonUkExtraction);
         document.getElementById('debugShowTextBtn').addEventListener('click', showPdfText);
     }
-    
     /**
      * Inicjalizuje tabele wyników z predefiniowanymi danymi
      */
@@ -118,7 +117,6 @@ document.addEventListener('DOMContentLoaded', function() {
             tbody.appendChild(row);
         }
     }
-    
     /**
      * Wypełnia tabele danymi z pliku Excel "Sales Receipt quickbooks.xlsx"
      */
@@ -143,6 +141,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 { col: 14, text: " ServiceDate" }
             ]},
             { cells: [
+                // Kolumna B (indeks 0) pozostaje pusta - będzie wypełniana losowym numerem
                 { col: 1, text: "Ebay" },
                 { col: 2, text: "2025-01-31" },
                 { col: 3, text: "Ebay" },
@@ -262,6 +261,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 { col: 12, text: "Currency" }
             ]},
             { cells: [
+                // Kolumna B (indeks 0) pozostaje pusta - będzie wypełniana losowym numerem
                 { col: 1, text: "eBay Fees" },
                 { col: 7, text: "Selling Fees:Ebay fees" },
                 { col: 10, text: "0.2" },
@@ -368,7 +368,6 @@ document.addEventListener('DOMContentLoaded', function() {
             }
         }
     }
-    
     /**
      * Przetwarza wybrany plik i wyświetla wyniki
      */
@@ -435,7 +434,6 @@ document.addEventListener('DOMContentLoaded', function() {
             loader.classList.add('hidden');
         }
     }
-    
     /**
      * Dodaje informacje o przetworzonym pliku do interfejsu
      * @param {string} fileName - Nazwa pliku
@@ -515,6 +513,9 @@ document.addEventListener('DOMContentLoaded', function() {
             tax: 'high'
         };
         
+        // Generujemy losowy 6-cyfrowy numer dla kolumny B
+        const randomSixDigitNumber = Math.floor(100000 + Math.random() * 900000);
+        
         // Utwórz mapę komórek do aktualizacji
         [
             // Przychody
@@ -549,13 +550,13 @@ document.addEventListener('DOMContentLoaded', function() {
             updateTableCell(tableElement, update);
         });
         
-        // Dodatkowy krok: wypełnij komórkę z nazwą platformy
+        // Dodatkowy krok: wypełnij kolumnę B (indeks 0) losowym numerem
         // Dla tabeli sales w wierszu przychodów
         const salesPlatformRow = platformConfig.mappings.income[1];
         updateTableCell(salesTable, {
             row: salesPlatformRow,
             column: 0,
-            value: platform,
+            value: randomSixDigitNumber,
             bold: true
         });
         
@@ -564,7 +565,7 @@ document.addEventListener('DOMContentLoaded', function() {
         updateTableCell(billsTable, {
             row: billsPlatformRow,
             column: 0,
-            value: platform,
+            value: randomSixDigitNumber,
             bold: true
         });
     }
@@ -592,7 +593,6 @@ document.addEventListener('DOMContentLoaded', function() {
         cell.dataset.platform = update.platform || '';
         cell.dataset.value = update.value || '';
     }
-    
     /**
      * Generuje i pobiera plik Excel z danymi
      */
@@ -695,7 +695,6 @@ document.addEventListener('DOMContentLoaded', function() {
         
         showAlert(labels.dataCleared, 'success');
     }
-    
     /**
      * Wyświetla alert dla użytkownika
      * @param {string} message - Treść komunikatu
@@ -796,7 +795,6 @@ document.addEventListener('DOMContentLoaded', function() {
             console.error('Błąd testowania:', error);
         }
     }
-    
     /**
      * Pokazuje tekst z pliku PDF
      * Funkcja używana w trybie debugowania
