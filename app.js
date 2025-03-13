@@ -496,80 +496,89 @@ document.addEventListener('DOMContentLoaded', function() {
         filesList.appendChild(fileItem);
     }
     
-    /**
-     * Aktualizuje tabele wyników na podstawie przetworzonych danych
-     * @param {Object} data - Przetworzone dane z pliku
-     */
-    function updateResultsTables(data) {
-        const platform = data.platform;
-        const currency = data.currency;
-        const financialData = data.financialData;
-        const platformConfig = Object.values(CONFIG).find(config => config.name === platform) || CONFIG.uk;
-        
-        // Dodajemy poziomy pewności dla wykrytych wartości (jeśli są dostępne)
-        const confidenceLevels = data.confidenceLevels || {
-            income: 'high',
-            expenses: 'high',
-            tax: 'high'
-        };
-        
-        // Generujemy losowy 6-cyfrowy numer dla kolumny B
-        const randomSixDigitNumber = Math.floor(100000 + Math.random() * 900000);
-        
-        // Utwórz mapę komórek do aktualizacji
-        [
-            // Przychody
-            {
-                table: platformConfig.mappings.income[0],
-                row: platformConfig.mappings.income[1],
-                column: platformConfig.mappings.income[2],
-                value: financialData.Income.toFixed(2),
-                className: `value-cell income confidence-${confidenceLevels.income}`,
-                suffix: ` ${currency}`
-            },
-            // Wydatki
-            {
-                table: platformConfig.mappings.expenses[0],
-                row: platformConfig.mappings.expenses[1],
-                column: platformConfig.mappings.expenses[2],
-                value: financialData.Expenses.toFixed(2),
-                className: `value-cell expense confidence-${confidenceLevels.expenses}`,
-                suffix: ` ${currency}`
-            },
+ /**
+ * Aktualizuje tabele wyników na podstawie przetworzonych danych
+ * @param {Object} data - Przetworzone dane z pliku
+ */
+function updateResultsTables(data) {
+    const platform = data.platform;
+    const currency = data.currency;
+    const financialData = data.financialData;
+    const platformConfig = Object.values(CONFIG).find(config => config.name === platform) || CONFIG.uk;
+    
+    // Dodajemy poziomy pewności dla wykrytych wartości (jeśli są dostępne)
+    const confidenceLevels = data.confidenceLevels || {
+        income: 'high',
+        expenses: 'high',
+        tax: 'high'
+    };
+    
+    // Generujemy losowy 6-cyfrowy numer dla kolumny B
+    const randomSixDigitNumber = Math.floor(100000 + Math.random() * 900000);
+    
+    // Przygotuj wartości do aktualizacji
+    const cellsToUpdate = [];
+    
+    // Zawsze dodajemy przychody i wydatki
+    cellsToUpdate.push(
+        // Przychody
+        {
+            table: platformConfig.mappings.income[0],
+            row: platformConfig.mappings.income[1],
+            column: platformConfig.mappings.income[2],
+            value: financialData.Income.toFixed(2),
+            className: `value-cell income confidence-${confidenceLevels.income}`,
+            suffix: ` ${currency}`
+        },
+        // Wydatki
+        {
+            table: platformConfig.mappings.expenses[0],
+            row: platformConfig.mappings.expenses[1],
+            column: platformConfig.mappings.expenses[2],
+            value: financialData.Expenses.toFixed(2),
+            className: `value-cell expense confidence-${confidenceLevels.expenses}`,
+            suffix: ` ${currency}`
+        }
+    );
+    
+    // Dodaj tax tylko jeśli to NIE jest Amazon DE
+    if (platform !== 'Amazon DE') {
+        cellsToUpdate.push({
             // Podatek
-            {
-                table: platformConfig.mappings.tax[0],
-                row: platformConfig.mappings.tax[1],
-                column: platformConfig.mappings.tax[2],
-                value: financialData.Tax.toFixed(2),
-                className: `value-cell tax confidence-${confidenceLevels.tax}`,
-                suffix: ` ${currency}`
-            }
-        ].forEach(update => {
-            const tableElement = update.table === 'sales' ? salesTable : billsTable;
-            updateTableCell(tableElement, update);
-        });
-        
-        // Dodatkowy krok: wypełnij kolumnę B (indeks 0) losowym numerem
-        // Dla tabeli sales w wierszu przychodów
-        const salesPlatformRow = platformConfig.mappings.income[1];
-        updateTableCell(salesTable, {
-            row: salesPlatformRow,
-            column: 0,
-            value: randomSixDigitNumber,
-            bold: true
-        });
-        
-        // Dla tabeli bills w wierszu wydatków
-        const billsPlatformRow = platformConfig.mappings.expenses[1];
-        updateTableCell(billsTable, {
-            row: billsPlatformRow,
-            column: 0,
-            value: randomSixDigitNumber,
-            bold: true
+            table: platformConfig.mappings.tax[0],
+            row: platformConfig.mappings.tax[1],
+            column: platformConfig.mappings.tax[2],
+            value: financialData.Tax.toFixed(2),
+            className: `value-cell tax confidence-${confidenceLevels.tax}`,
+            suffix: ` ${currency}`
         });
     }
     
+    // Aktualizuj komórki
+    cellsToUpdate.forEach(update => {
+        const tableElement = update.table === 'sales' ? salesTable : billsTable;
+        updateTableCell(tableElement, update);
+    });
+    
+    // Dodatkowy krok: wypełnij kolumnę B (indeks 0) losowym numerem
+    // Dla tabeli sales w wierszu przychodów
+    const salesPlatformRow = platformConfig.mappings.income[1];
+    updateTableCell(salesTable, {
+        row: salesPlatformRow,
+        column: 0,
+        value: randomSixDigitNumber,
+        bold: true
+    });
+    
+    // Dla tabeli bills w wierszu wydatków
+    const billsPlatformRow = platformConfig.mappings.expenses[1];
+    updateTableCell(billsTable, {
+        row: billsPlatformRow,
+        column: 0,
+        value: randomSixDigitNumber,
+        bold: true
+    });
+}    
     /**
      * Aktualizuje komórkę w tabeli
      * @param {HTMLElement} table - Element tabeli

@@ -63,27 +63,51 @@ async function processPdf(file, platform) {
         
         // Dla raportów Amazon UK stosujemy specjalne metody wykrywania
         if (platform === 'uk') {
-            // Metoda 1: Bezpośrednie wyszukiwanie w specyficznych formatach raportów Amazon
-            await extractAmazonUkValues(fullText, financialData);
-            
-            // Sprawdź, które wartości zostały znalezione
-            if (financialData.Income > 0) {
-                incomeFound = true;
-                incomeConfidence = 'high';
-                console.log('Amazon UK: znaleziono Income:', financialData.Income);
-            }
-            
-            if (financialData.Expenses < 0) {
-                expensesFound = true;
-                expensesConfidence = 'high';
-                console.log('Amazon UK: znaleziono Expenses:', financialData.Expenses);
-            }
-            
-            if (financialData.Tax > 0) {
-                taxFound = true;
-                taxConfidence = 'high';
-                console.log('Amazon UK: znaleziono Tax:', financialData.Tax);
-            }
+    // Metoda 1: Bezpośrednie wyszukiwanie w specyficznych formatach raportów Amazon
+    await extractAmazonUkValues(fullText, financialData);
+    
+    // Sprawdź, które wartości zostały znalezione
+    if (financialData.Income > 0) {
+        incomeFound = true;
+        incomeConfidence = 'high';
+        console.log('Amazon UK: znaleziono Income:', financialData.Income);
+    }
+    
+    if (financialData.Expenses < 0) {
+        expensesFound = true;
+        expensesConfidence = 'high';
+        console.log('Amazon UK: znaleziono Expenses:', financialData.Expenses);
+    }
+    
+    if (financialData.Tax > 0) {
+        taxFound = true;
+        taxConfidence = 'high';
+        console.log('Amazon UK: znaleziono Tax:', financialData.Tax);
+    }
+}
+// Dla raportów Amazon DE stosujemy specjalne metody wykrywania
+else if (platform === 'de') {
+    // Specjalna metoda dla Amazon DE
+    const dataFound = await extractAmazonDeValues(fullText, financialData);
+    
+    // Sprawdź, które wartości zostały znalezione
+    if (financialData.Income > 0) {
+        incomeFound = true;
+        incomeConfidence = 'high';
+        console.log('Amazon DE: znaleziono Income:', financialData.Income);
+    }
+    
+    if (financialData.Expenses < 0) {
+        expensesFound = true;
+        expensesConfidence = 'high';
+        console.log('Amazon DE: znaleziono Expenses:', financialData.Expenses);
+    }
+    
+    // Tax dla Amazon DE jest zawsze 0 i ignorowany w tabelce
+    taxFound = true;
+    taxConfidence = 'high';
+    console.log('Amazon DE: Tax jest ignorowany, ustawiono na 0');
+}
         }
         
         // Jeżeli wartości nie zostały znalezione metodą specjalną, użyj ogólnego algorytmu
@@ -658,4 +682,167 @@ async function extractAmazonUkValues(fullText, financialData) {
     
     // Po wszystkich metodach walidujemy dane
     validateFinancialData(financialData);
+/**
+ * Poprawiona funkcja do przetwarzania Amazon DE
+ * Dodaj tę funkcję do pdfProcessor.js
+ * @param {string} fullText - Pełny tekst dokumentu
+ * @param {Object} financialData - Obiekt na dane finansowe
+ * @returns {boolean} - True jeśli znaleziono dane, false w przeciwnym razie
+ */
+async function extractAmazonDeValues(fullText, financialData) {
+    console.log('Przetwarzanie pliku Amazon DE');
+    let dataFound = false;
+    
+    // Szukanie sekcji Zusammenfassungen (Podsumowanie)
+    const summarySection = fullText.match(/Zusammenfassungen[\s\S]{0,1000}/i);
+    if (summarySection) {
+        const summaryText = summarySection[0];
+        console.log('Znaleziono sekcję Zusammenfassungen');
+        
+        // Szukanie wartości Einnahmen (Income)
+        const incomeRegex = /Einnahmen\s+[\s\S]*?(\d{1,3}(?:[.,]\d{3})*[.,]\d{2})/i;
+        const incomeMatch = summaryText.match(incomeRegex);
+        if (incomeMatch) {
+            // Konwersja liczby z formatu europejskiego (1.234,56) na format amerykański (1234.56)
+            const valueStr = incomeMatch[1].replace(/\./g, '').replace(/,/g, '.');
+            const value = parseFloat(valueStr);
+            if (!isNaN(value) && value > 0) {
+                financialData.Income = value;
+                console.log('Znaleziono Income (Einnahmen):', value);
+                dataFound = true;
+            }
+        }
+        
+        // Szukanie wartości Ausgaben (Expenses)
+        const expensesRegex = /Ausgaben\s+[\s\S]*?(-\d{1,3}(?:[.,]\d{3})*[.,]\d{2}|-\d+[.,]\d{2})/i;
+        const expensesMatch = summaryText.match(expensesRegex);
+        if (expensesMatch) {
+            const valueStr = expensesMatch[1].replace(/\./g, '').replace(/,/g, '.');
+            const value = parseFloat(valueStr);
+            if (!isNaN(value) && value < 0) {
+                financialData.Expenses = value;
+                console.log('Znaleziono Expenses (Ausgaben):', value);
+                dataFound = true;
+            }
+        } else {
+            // Czasami wartość może być bez znaku minus
+            const expensesPositiveRegex = /Ausgaben\s+[\s\S]*?(\d{1,3}(?:[.,]\d{3})*[.,]\d{2}|\d+[.,]\d{2})/i;
+            const expensesPositiveMatch = summaryText.match(expensesPositiveRegex);
+            if (expensesPositiveMatch) {
+                const valueStr = expensesPositiveMatch[1].replace(/\./g, '').replace(/,/g, '.');
+                const value = parseFloat(valueStr);
+                if (!isNaN(value) && value > 0) {
+                    financialData.Expenses = -value; // Dodajemy znak minus
+                    console.log('Znaleziono Expenses (dodatnie Ausgaben):', -value);
+                    dataFound = true;
+                }
+            }
+        }
+        
+        // Tax dla Amazon DE jest ignorowany - ustawiamy na 0
+        financialData.Tax = 0;
+        console.log('Tax dla Amazon DE jest ignorowany, ustawiono 0');
+    }
+    
+    // Jeśli nie znaleziono w Zusammenfassungen, szukamy w głównych sekcjach
+    if (!dataFound) {
+        // Szukanie sekcji Einnahmen (Income)
+        const incomeSection = fullText.match(/Einnahmen[\s\S]{0,2000}/i);
+        if (incomeSection) {
+            const incomeText = incomeSection[0];
+            
+            // Szukamy wartości sumy w tej sekcji (często pojawia się jako duża liczba)
+            const totalMatch = incomeText.match(/Gesamt[\s\S]*?(\d{1,3}(?:[.,]\d{3})*[.,]\d{2}|\d+[.,]\d{2})/i);
+            if (totalMatch) {
+                const valueStr = totalMatch[1].replace(/\./g, '').replace(/,/g, '.');
+                const value = parseFloat(valueStr);
+                if (!isNaN(value) && value > 0) {
+                    financialData.Income = value;
+                    console.log('Znaleziono Income w sekcji Einnahmen:', value);
+                    dataFound = true;
+                }
+            }
+        }
+        
+        // Szukanie sekcji Ausgaben (Expenses)
+        const expensesSection = fullText.match(/Ausgaben[\s\S]{0,2000}/i);
+        if (expensesSection) {
+            const expensesText = expensesSection[0];
+            
+            // Szukamy wartości sumy w tej sekcji
+            const totalMatch = expensesText.match(/Gesamt[\s\S]*?(-\d{1,3}(?:[.,]\d{3})*[.,]\d{2}|-\d+[.,]\d{2})/i);
+            if (totalMatch) {
+                const valueStr = totalMatch[1].replace(/\./g, '').replace(/,/g, '.');
+                const value = parseFloat(valueStr);
+                if (!isNaN(value) && value < 0) {
+                    financialData.Expenses = value;
+                    console.log('Znaleziono Expenses w sekcji Ausgaben:', value);
+                    dataFound = true;
+                }
+            }
+        }
+        
+        // Tax dla Amazon DE jest ignorowany - ustawiamy na 0
+        financialData.Tax = 0;
+        console.log('Tax dla Amazon DE jest ignorowany, ustawiono 0');
+    }
+    
+    // Jeśli jeszcze nic nie znaleziono, poszukajmy w całym tekście
+    if (!dataFound) {
+        // Szukamy liczb ze specyficznym formatowaniem, które mogą wskazywać na wartości finansowe
+        const financialValueRegex = /(\d{1,3}(?:\.\d{3})*,\d{2})/g;
+        const matches = [...fullText.matchAll(financialValueRegex)];
+        
+        // Grupuj znalezione liczby według wartości
+        const valueGroups = {};
+        for (const match of matches) {
+            const valueStr = match[1].replace(/\./g, '').replace(/,/g, '.');
+            const value = parseFloat(valueStr);
+            if (!isNaN(value)) {
+                if (!valueGroups[value]) {
+                    valueGroups[value] = 0;
+                }
+                valueGroups[value]++;
+            }
+        }
+        
+        // Znajdź liczby, które pojawiają się najczęściej - mogą to być istotne wartości
+        const sortedValues = Object.entries(valueGroups)
+            .sort((a, b) => b[1] - a[1])
+            .map(entry => parseFloat(entry[0]));
+        
+        if (sortedValues.length > 0) {
+            // Zakładamy, że największa wartość to przychody
+            const largestValue = Math.max(...sortedValues);
+            if (largestValue > 0) {
+                financialData.Income = largestValue;
+                console.log('Znaleziono potencjalny Income:', largestValue);
+                dataFound = true;
+            }
+            
+            // Szukamy ujemnych wartości na wydatki
+            const negativeValues = sortedValues.filter(v => v < 0);
+            if (negativeValues.length > 0) {
+                const smallestValue = Math.min(...negativeValues);
+                financialData.Expenses = smallestValue;
+                console.log('Znaleziono potencjalne Expenses:', smallestValue);
+                dataFound = true;
+            } else {
+                // Jeśli nie ma ujemnych, szukamy drugiej największej wartości i zakładamy, że to wydatki
+                if (sortedValues.length > 1) {
+                    const secondValue = sortedValues[1];
+                    financialData.Expenses = -secondValue; // Dodajemy minus
+                    console.log('Znaleziono potencjalne Expenses (jako druga wartość):', -secondValue);
+                    dataFound = true;
+                }
+            }
+            
+            // Tax dla Amazon DE jest ignorowany - ustawiamy na 0
+            financialData.Tax = 0;
+            console.log('Tax dla Amazon DE jest ignorowany, ustawiono 0');
+        }
+    }
+    
+    return dataFound;
+}
 }

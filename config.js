@@ -188,14 +188,14 @@ const DEMO_DATA = {
         }
     },
     'de': {
-        platform: "Amazon DE",
-        currency: "EUR",
-        financialData: {
-            Income: 1594.42,
-            Expenses: -335.12,
-            Tax: 0
-        }
-    },
+    platform: "Amazon DE",
+    currency: "EUR",
+    financialData: {
+        Income: 1594.42,
+        Expenses: -335.12,
+        Tax: 0  // Tax ustawiony na 0 dla Amazon DE
+    }
+},
     'es': {
         platform: "Amazon ES",
         currency: "EUR",
